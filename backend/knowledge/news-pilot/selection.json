@@ -1,0 +1,395 @@
+{
+  "prepared_at": "2026-11-13",
+  "status": "local_preparation_only",
+  "runtime_ingestion": false,
+  "public_retrieval_allowed": false,
+  "avn_integration": "deferred_until_ready_and_customer_outputs_approved",
+  "phone_news_retrieval": false,
+  "selected_count": 30,
+  "selection_rationale": "Four digest periods across May/June, July, September and October; varied market, condo, development, luxury, financing and international-buyer topics. Selection is for extraction/retrieval evaluation, not publication approval.",
+  "articles": [
+    {
+      "article_id": "news-20250526-20250601-01",
+      "title": "China leads countries searching for Miami real estate",
+      "topics": [
+        "international_buyers"
+      ],
+      "source_document_url": "https://docs.google.com/document/d/1IJZc9KnLlawnj1qmZZmqpC7PD2JT_aEWZAymh_3q8Lg/edit?usp=drivesdk",
+      "original_url": "https://therealdeal.com/miami/2025/05/27/china-leads-countries-searching-for-miami-real-estate/",
+      "quality_flags": [
+        "claims_and_reporting_periods_require_source_verification"
+      ]
+    },
+    {
+      "article_id": "news-20250526-20250601-02",
+      "title": "Buyers from Argentina purchased more real estate in South Florida last year than any other foreign country",
+      "topics": [
+        "international_buyers"
+      ],
+      "source_document_url": "https://docs.google.com/document/d/1IJZc9KnLlawnj1qmZZmqpC7PD2JT_aEWZAymh_3q8Lg/edit?usp=drivesdk",
+      "original_url": "https://therealdeal.com/south-florida/2025/05/27/buyers-from-argentina-purchased-more-real-estate-in-south-florida-last-year-than-any-other-foreign-country/",
+      "quality_flags": [
+        "claims_and_reporting_periods_require_source_verification"
+      ]
+    },
+    {
+      "article_id": "news-20250526-20250601-03",
+      "title": "Navigating opportunities, challenges in South Florida’s real estate market",
+      "topics": [
+        "market_statistics"
+      ],
+      "source_document_url": "https://docs.google.com/document/d/1IJZc9KnLlawnj1qmZZmqpC7PD2JT_aEWZAymh_3q8Lg/edit?usp=drivesdk",
+      "original_url": "https://www.bizjournals.com/southflorida/news/2025/05/29/miami-real-estate-experts-bullish-challenges.html",
+      "quality_flags": [
+        "political_timeline_claim_requires_verification",
+        "claims_and_reporting_periods_require_source_verification"
+      ]
+    },
+    {
+      "article_id": "news-20250526-20250601-05",
+      "title": "Housing Scorecard: Inventory surges, and days on market climb",
+      "topics": [
+        "market_statistics"
+      ],
+      "source_document_url": "https://docs.google.com/document/d/1IJZc9KnLlawnj1qmZZmqpC7PD2JT_aEWZAymh_3q8Lg/edit?usp=drivesdk",
+      "original_url": "https://southfloridaagentmagazine.com/2025/05/30/housing-scorecard-6/",
+      "quality_flags": [
+        "claims_and_reporting_periods_require_source_verification"
+      ]
+    },
+    {
+      "article_id": "news-20250526-20250601-08",
+      "title": "Homeowners eager to sell may have to wait a while before a buyer comes along",
+      "topics": [
+        "general_real_estate"
+      ],
+      "source_document_url": "https://docs.google.com/document/d/1IJZc9KnLlawnj1qmZZmqpC7PD2JT_aEWZAymh_3q8Lg/edit?usp=drivesdk",
+      "original_url": "https://www.sun-sentinel.com/2025/05/30/homeowners-eager-sell-buyer-market-trends/",
+      "quality_flags": [
+        "claims_and_reporting_periods_require_source_verification"
+      ]
+    },
+    {
+      "article_id": "news-20250526-20250601-09",
+      "title": "Home Sale Cancellations Surge to Near Record Highs",
+      "topics": [
+        "financing_and_affordability"
+      ],
+      "source_document_url": "https://docs.google.com/document/d/1IJZc9KnLlawnj1qmZZmqpC7PD2JT_aEWZAymh_3q8Lg/edit?usp=drivesdk",
+      "original_url": "https://www.newsweek.com/home-sale-cancellations-surge-near-record-highs-2076967",
+      "quality_flags": [
+        "claims_and_reporting_periods_require_source_verification"
+      ]
+    },
+    {
+      "article_id": "news-20250721-20250727-04",
+      "title": "Miami-Dade Older Condominiums Selling Faster than Newer Units; $1M & Up Condo Sales Continue Rising",
+      "topics": [
+        "market_statistics",
+        "condos",
+        "luxury"
+      ],
+      "source_document_url": "https://docs.google.com/document/d/1nLV-ehndQ9VN6O4-8TU8oL3E7HZPynA3_STGDhu6SIA/edit?usp=drivesdk",
+      "original_url": "https://www.miamirealtors.com/2025/07/23/miami-dade-older-condominiums-selling-faster-than-newer-units-1m-up-condo-sales-continue-rising/",
+      "quality_flags": [
+        "claims_and_reporting_periods_require_source_verification"
+      ]
+    },
+    {
+      "article_id": "news-20250721-20250727-06",
+      "title": "Palm Beach County Year-to-Date Total Dollar Volume Higher Than Last Year",
+      "topics": [
+        "market_statistics"
+      ],
+      "source_document_url": "https://docs.google.com/document/d/1nLV-ehndQ9VN6O4-8TU8oL3E7HZPynA3_STGDhu6SIA/edit?usp=drivesdk",
+      "original_url": "https://www.miamirealtors.com/2025/07/23/palm-beach-county-year-to-date-total-dollar-volume-higher-than-last-year/",
+      "quality_flags": [
+        "claims_and_reporting_periods_require_source_verification"
+      ]
+    },
+    {
+      "article_id": "news-20250721-20250727-07",
+      "title": "14 Consecutive Years of Home Price Appreciation for Miami Real Estate",
+      "topics": [
+        "market_statistics"
+      ],
+      "source_document_url": "https://docs.google.com/document/d/1nLV-ehndQ9VN6O4-8TU8oL3E7HZPynA3_STGDhu6SIA/edit?usp=drivesdk",
+      "original_url": "https://www.miamirealtors.com/2025/07/24/14-consecutive-years-of-home-price-appreciation-for-miami-real-estate/",
+      "quality_flags": [
+        "claims_and_reporting_periods_require_source_verification"
+      ]
+    },
+    {
+      "article_id": "news-20250721-20250727-08",
+      "title": "Florida's Struggling Housing Market Reports First Positive Shift in Months",
+      "topics": [
+        "market_statistics"
+      ],
+      "source_document_url": "https://docs.google.com/document/d/1nLV-ehndQ9VN6O4-8TU8oL3E7HZPynA3_STGDhu6SIA/edit?usp=drivesdk",
+      "original_url": "https://www.newsweek.com/florida-struggling-housing-market-reports-first-positive-shift-months-2106808",
+      "quality_flags": [
+        "claims_and_reporting_periods_require_source_verification"
+      ]
+    },
+    {
+      "article_id": "news-20250721-20250727-09",
+      "title": "Home Sales May Fall to New 30-Year Low in 2025 as Mortgage Rates Remain Elevated",
+      "topics": [
+        "market_statistics",
+        "financing_and_affordability"
+      ],
+      "source_document_url": "https://docs.google.com/document/d/1nLV-ehndQ9VN6O4-8TU8oL3E7HZPynA3_STGDhu6SIA/edit?usp=drivesdk",
+      "original_url": "https://www.sfgate.com/realestate/article/home-sales-may-fall-to-new-30-year-low-in-2025-as-20781843.php",
+      "quality_flags": [
+        "claims_and_reporting_periods_require_source_verification"
+      ]
+    },
+    {
+      "article_id": "news-20250721-20250727-10",
+      "title": "Palm Beach lidera auge inmobiliario de lujo en Florida (Palm Beach Leads Luxury Real Estate Boom in Florida)",
+      "topics": [
+        "luxury"
+      ],
+      "source_document_url": "https://docs.google.com/document/d/1nLV-ehndQ9VN6O4-8TU8oL3E7HZPynA3_STGDhu6SIA/edit?usp=drivesdk",
+      "original_url": "https://realestatemarket.com.mx/noticias/mercado-inmobiliario/48701-palm-beach-lidera-auge-inmobiliario-de-lujo-en-florida",
+      "quality_flags": [
+        "claims_and_reporting_periods_require_source_verification"
+      ]
+    },
+    {
+      "article_id": "news-20250721-20250727-13",
+      "title": "Slowest week of the year: Luxe resi contracts plummet in Miami-Dade",
+      "topics": [
+        "market_statistics",
+        "luxury"
+      ],
+      "source_document_url": "https://docs.google.com/document/d/1nLV-ehndQ9VN6O4-8TU8oL3E7HZPynA3_STGDhu6SIA/edit?usp=drivesdk",
+      "original_url": "https://therealdeal.com/miami/2025/07/21/signed-luxe-residential-contracts-plunge-in-miami-dade/",
+      "quality_flags": [
+        "claims_and_reporting_periods_require_source_verification"
+      ]
+    },
+    {
+      "article_id": "news-20250721-20250727-16",
+      "title": "Grupos religiosos abordan la crisis de vivienda en Miami con proyectos de renta asequible (Religious groups address the housing crisis in Miami with affordable rental projects)",
+      "topics": [
+        "market_statistics",
+        "development",
+        "financing_and_affordability"
+      ],
+      "source_document_url": "https://docs.google.com/document/d/1nLV-ehndQ9VN6O4-8TU8oL3E7HZPynA3_STGDhu6SIA/edit?usp=drivesdk",
+      "original_url": "https://www.elnuevoherald.com/noticias/bienes-raices/article311448790.html",
+      "quality_flags": [
+        "claims_and_reporting_periods_require_source_verification"
+      ]
+    },
+    {
+      "article_id": "news-20250901-20250907-01",
+      "title": "The Weekly Dirt: Signs of a buyer’s market in Miami",
+      "topics": [
+        "market_statistics"
+      ],
+      "source_document_url": "https://docs.google.com/document/d/1fOktkGVWkEYfBVTALa9Ftnq4Ptd8ikG0TUcPoLJfIJA/edit?usp=drivesdk",
+      "original_url": "https://therealdeal.com/miami/2025/09/07/signs-that-point-to-a-buyers-market-in-south-florida-in-2025/",
+      "quality_flags": [
+        "claims_and_reporting_periods_require_source_verification"
+      ]
+    },
+    {
+      "article_id": "news-20250901-20250907-02",
+      "title": "Remaking a skyline: Status of West Palm Beach’s condo pipeline",
+      "topics": [
+        "condos",
+        "development"
+      ],
+      "source_document_url": "https://docs.google.com/document/d/1fOktkGVWkEYfBVTALa9Ftnq4Ptd8ikG0TUcPoLJfIJA/edit?usp=drivesdk",
+      "original_url": "https://therealdeal.com/miami/2025/09/04/here-is-west-palm-beachs-condo-pipeline/",
+      "quality_flags": [
+        "claims_and_reporting_periods_require_source_verification"
+      ]
+    },
+    {
+      "article_id": "news-20250901-20250907-03",
+      "title": "Miami developers hunt for condo buyers from London to Latin America",
+      "topics": [
+        "condos",
+        "development",
+        "international_buyers"
+      ],
+      "source_document_url": "https://docs.google.com/document/d/1fOktkGVWkEYfBVTALa9Ftnq4Ptd8ikG0TUcPoLJfIJA/edit?usp=drivesdk",
+      "original_url": "https://therealdeal.com/miami/2025/09/02/miami-developers-hunt-for-condo-buyers-from-london-to-latin-america/",
+      "quality_flags": [
+        "claims_and_reporting_periods_require_source_verification"
+      ]
+    },
+    {
+      "article_id": "news-20250901-20250907-04",
+      "title": "Older South Florida condos now selling faster than new construction units amid affordability crunch",
+      "topics": [
+        "condos",
+        "development",
+        "financing_and_affordability"
+      ],
+      "source_document_url": "https://docs.google.com/document/d/1fOktkGVWkEYfBVTALa9Ftnq4Ptd8ikG0TUcPoLJfIJA/edit?usp=drivesdk",
+      "original_url": "https://www.foxbusiness.com/media/older-south-florida-condos-now-selling-faster-than-new-construction-units-amid-affordability-crunch",
+      "quality_flags": [
+        "claims_and_reporting_periods_require_source_verification"
+      ]
+    },
+    {
+      "article_id": "news-20250901-20250907-05",
+      "title": "South Florida housing market “no longer overheated” but still far from cooling off",
+      "topics": [
+        "market_statistics"
+      ],
+      "source_document_url": "https://docs.google.com/document/d/1fOktkGVWkEYfBVTALa9Ftnq4Ptd8ikG0TUcPoLJfIJA/edit?usp=drivesdk",
+      "original_url": "https://www.bizjournals.com/southflorida/news/2025/09/04/miami-home-sales-condos-broward-palm-beach.html",
+      "quality_flags": [
+        "claims_and_reporting_periods_require_source_verification"
+      ]
+    },
+    {
+      "article_id": "news-20251020-20251026-01",
+      "title": "Miami-Dade Real Estate Registers Best Sales Month of the Year; Affordable and $1M & Up Condo Transactions Surge",
+      "topics": [
+        "market_statistics",
+        "condos",
+        "luxury",
+        "financing_and_affordability"
+      ],
+      "source_document_url": "https://docs.google.com/document/d/1iS3NHidWFvRE0rRKZRgGq12qBw-bfYcHfwH9YKiWACw/edit?usp=drivesdk",
+      "original_url": "https://www.prnewswire.com/news-releases/miami-dade-real-estate-registers-best-sales-month-of-the-year-302593265.html",
+      "quality_flags": [
+        "claims_and_reporting_periods_require_source_verification"
+      ]
+    },
+    {
+      "article_id": "news-20251020-20251026-02",
+      "title": "Palm Beach County's Top-Ranked All-Cash Market Shielded from Elevated Mortgage Rates",
+      "topics": [
+        "market_statistics",
+        "financing_and_affordability"
+      ],
+      "source_document_url": "https://docs.google.com/document/d/1iS3NHidWFvRE0rRKZRgGq12qBw-bfYcHfwH9YKiWACw/edit?usp=drivesdk",
+      "original_url": "https://www.miamirealtors.com/2025/10/23/palm-beach-countys-top-ranked-all-cash-market-shielded-from-elevated-mortgage-rates/",
+      "quality_flags": [
+        "claims_and_reporting_periods_require_source_verification"
+      ]
+    },
+    {
+      "article_id": "news-20251020-20251026-03",
+      "title": "South Florida Residential Sales Surge in September 2025",
+      "topics": [
+        "market_statistics"
+      ],
+      "source_document_url": "https://docs.google.com/document/d/1iS3NHidWFvRE0rRKZRgGq12qBw-bfYcHfwH9YKiWACw/edit?usp=drivesdk",
+      "original_url": "https://therealdeal.com/miami/2025/10/24/south-florida-residential-sales-surge-in-september-2025/",
+      "quality_flags": [
+        "claims_and_reporting_periods_require_source_verification"
+      ]
+    },
+    {
+      "article_id": "news-20251020-20251026-04",
+      "title": "Broward County Real Estate Posts Best Sales Month of the Year",
+      "topics": [
+        "market_statistics"
+      ],
+      "source_document_url": "https://docs.google.com/document/d/1iS3NHidWFvRE0rRKZRgGq12qBw-bfYcHfwH9YKiWACw/edit?usp=drivesdk",
+      "original_url": "https://www.miamirealtors.com/2025/10/23/broward-county-real-estate-posts-best-sales-month-of-the-year/",
+      "quality_flags": [
+        "claims_and_reporting_periods_require_source_verification"
+      ]
+    },
+    {
+      "article_id": "news-20251020-20251026-05",
+      "title": "Rates at Lowest Level in More Than a Year",
+      "topics": [
+        "market_statistics",
+        "financing_and_affordability"
+      ],
+      "source_document_url": "https://docs.google.com/document/d/1iS3NHidWFvRE0rRKZRgGq12qBw-bfYcHfwH9YKiWACw/edit?usp=drivesdk",
+      "original_url": "https://www.floridarealtors.org/news-media/news-articles/2025/10/rates-lowest-level-more-year",
+      "quality_flags": [
+        "claims_and_reporting_periods_require_source_verification"
+      ]
+    },
+    {
+      "article_id": "news-20251020-20251026-07",
+      "title": "Lower mortgage rates extend housing momentum into fall",
+      "topics": [
+        "market_statistics",
+        "financing_and_affordability"
+      ],
+      "source_document_url": "https://docs.google.com/document/d/1iS3NHidWFvRE0rRKZRgGq12qBw-bfYcHfwH9YKiWACw/edit?usp=drivesdk",
+      "original_url": "https://investors.zillowgroup.com/investors/news-and-events/news/news-details/2025/Lower-mortgage-rates-extend-housing-momentum-into-fall/default.aspx",
+      "quality_flags": [
+        "claims_and_reporting_periods_require_source_verification"
+      ]
+    },
+    {
+      "article_id": "news-20251020-20251026-09",
+      "title": "Homebuyers Benefitting From A Sluggish Market",
+      "topics": [
+        "market_statistics"
+      ],
+      "source_document_url": "https://docs.google.com/document/d/1iS3NHidWFvRE0rRKZRgGq12qBw-bfYcHfwH9YKiWACw/edit?usp=drivesdk",
+      "original_url": "https://nationalmortgageprofessional.com/news/homebuyers-benefitting-sluggish-market",
+      "quality_flags": [
+        "claims_and_reporting_periods_require_source_verification"
+      ]
+    },
+    {
+      "article_id": "news-20251020-20251026-10",
+      "title": "China and Singapore lead web searches for South Florida real estate",
+      "topics": [
+        "international_buyers"
+      ],
+      "source_document_url": "https://docs.google.com/document/d/1iS3NHidWFvRE0rRKZRgGq12qBw-bfYcHfwH9YKiWACw/edit?usp=drivesdk",
+      "original_url": "https://southfloridaagentmagazine.com/2025/10/24/china-singapore-international-real-estate-web-searches/",
+      "quality_flags": [
+        "claims_and_reporting_periods_require_source_verification"
+      ]
+    },
+    {
+      "article_id": "news-20251020-20251026-13",
+      "title": "Fisher Island, el código postal más caro de EEUU en 2025 (Fisher Island, the most expensive ZIP code in the USA in 2025)",
+      "topics": [
+        "luxury"
+      ],
+      "source_document_url": "https://docs.google.com/document/d/1iS3NHidWFvRE0rRKZRgGq12qBw-bfYcHfwH9YKiWACw/edit?usp=drivesdk",
+      "original_url": "https://www.diariolasamericas.com/florida/fisher-island-el-codigo-postal-mas-caro-eeuu-2025-n5384210",
+      "quality_flags": [
+        "published_outside_digest_week",
+        "claims_and_reporting_periods_require_source_verification"
+      ]
+    },
+    {
+      "article_id": "news-20251020-20251026-14",
+      "title": "Calta Group proposes Anatomia apartments and condos in Miami using Live Local Act",
+      "topics": [
+        "condos",
+        "development"
+      ],
+      "source_document_url": "https://docs.google.com/document/d/1iS3NHidWFvRE0rRKZRgGq12qBw-bfYcHfwH9YKiWACw/edit?usp=drivesdk",
+      "original_url": "https://commercialobserver.com/2025/09/calta-miami-health-district-live-local-act/",
+      "quality_flags": [
+        "published_outside_digest_week",
+        "claims_and_reporting_periods_require_source_verification"
+      ]
+    },
+    {
+      "article_id": "news-20251020-20251026-15",
+      "title": "‘Quiet luxury’ is coming for the housing market, Corcoran Group CEO says. It’s not just the Hamptons, Aspen, and Miami anymore.",
+      "topics": [
+        "market_statistics",
+        "luxury"
+      ],
+      "source_document_url": "https://docs.google.com/document/d/1iS3NHidWFvRE0rRKZRgGq12qBw-bfYcHfwH9YKiWACw/edit?usp=drivesdk",
+      "original_url": "https://fortune.com/2025/09/09/quiet-luxury-housing-market-corcoran-group-ceo-hamptons-aspen-miami/",
+      "quality_flags": [
+        "published_outside_digest_week",
+        "claims_and_reporting_periods_require_source_verification"
+      ]
+    }
+  ]
+}

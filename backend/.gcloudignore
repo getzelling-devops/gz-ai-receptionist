@@ -1,0 +1,9 @@
+*
+!Dockerfile
+!pyproject.toml
+!uv.lock
+!receptionist/
+!receptionist/*.py
+!receptionist/*.json
+**/__pycache__/
+*.pyc

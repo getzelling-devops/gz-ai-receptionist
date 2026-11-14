@@ -1,0 +1,35 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: Geist;
+  src: url("./fonts/Geist-Regular.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: Geist;
+  src: url("./fonts/Geist-Medium.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+}
+@theme {
+  --font-sans: Geist, Arial, sans-serif;
+  --color-navy: #0b2545;
+  --color-bronze: #8c6844;
+  --color-paper: #f4f1ea;
+  --color-ink: #201c16;
+  --color-hairline: #e4dccd;
+}
+body { background: var(--color-paper); color: var(--color-ink); font-family: var(--font-sans); }
+:focus-visible { outline: 2px solid var(--color-navy); outline-offset: 2px; }
+button { cursor: pointer; }
+button:disabled { opacity: 0.55; cursor: default; }
+.widget-composer { padding-bottom: max(0.75rem, env(safe-area-inset-bottom)); }
+.widget-composer textarea { max-height: 7rem; }
+@media (max-height: 550px) {
+  .widget-shell header h1 { font-size: 20px; }
+  .widget-shell header { padding-block: 4px; }
+  .widget-composer textarea { max-height: 4rem; }
+}

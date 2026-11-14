@@ -1,0 +1,70 @@
+{
+  "reviewed_at": "2026-11-13T13:29:02Z",
+  "purpose": "Website context captured for a future knowledge update and RAG design discussion.",
+  "status": "review_notes_only",
+  "runtime_ingestion": false,
+  "method": "Read the private preview in an authenticated browser using the owner's supplied access code. No credential is stored in these notes.",
+  "sources": [
+    "https://getzelling.com/",
+    "https://getzelling.com/sellers",
+    "https://getzelling.com/about",
+    "https://getzelling.com/field-notes",
+    "https://getzelling.com/field-notes/02-software-first",
+    "https://getzelling.com/new-developments/news"
+  ],
+  "business_context": [
+    {
+      "topic": "Client app",
+      "summary": "Clients and agents share visibility into showings, open houses, completed actions, pending steps and contract milestones. The home-page FAQ describes inspection, financing, appraisal, walkthrough and closing milestones, with calendar updates.",
+      "source": "https://getzelling.com/",
+      "scope": "Describe the app; do not imply the receptionist can access a client's records or send invitations."
+    },
+    {
+      "topic": "Fees",
+      "summary": "The FAQ describes a 1% listing fee at $1M and above and $10,000 below. An outside buyer agent's compensation is separate, negotiated and agreed in writing. When GetZelling supplies both sides, the FAQ states 2% at $1M and above or $20,000 below. Closing costs and taxes are distinct.",
+      "source": "https://getzelling.com/",
+      "scope": "Preserve listing-side versus combined compensation distinctions; confirm detailed fee explanations with the owner before deployment."
+    },
+    {
+      "topic": "Human service",
+      "summary": "Licensed local agents host showings, negotiate offers and attend closings. The platform supports scheduling, deadlines and follow-ups. The workflow covers consultation, comparable-sales pricing, listing launch, showings, offers and closing.",
+      "source": "https://getzelling.com/about"
+    },
+    {
+      "topic": "MarktMind",
+      "summary": "The company describes an in-house valuation engine that uses comparable sales and shows the reasoning behind an estimate. Spoken pronunciation remains Market Mind. A report offer is not a claim that the receptionist generated or delivered one.",
+      "source": "https://getzelling.com/about"
+    },
+    {
+      "topic": "Editorial company narrative",
+      "summary": "The November 2 essay explains the software-first brokerage model and describes client portals, showing feedback, documents and transaction workflows. It is an attributed editorial source; quantitative claims and detailed automation capabilities need owner verification.",
+      "source": "https://getzelling.com/field-notes/02-software-first"
+    }
+  ],
+  "news_corpus_observations": [
+    {
+      "source": "gz-gz-website/content/new-developments/news.json",
+      "summary": "The website repository already contains the same 58 entries as structured records with d, pid, project, seg, tier, h, source and url fields. This can seed an ingestion pilot directly. Confirm what d represents, preserve partial-date precision and validate original links before treating an entry as cited evidence."
+    },
+    {
+      "source": "https://getzelling.com/new-developments/news",
+      "summary": "The preview lists 58 financing, construction and sales entries, grouped by date and tagged by project and submarket. Some entries link to sources; others explicitly lack public links. Preserve distinctions between proposals, expected closings and completed events."
+    },
+    {
+      "source": "https://getzelling.com/field-notes",
+      "summary": "The preview includes issues dated November 16, November 30 and December 14, 2026, later than this review. Visibility in the preview is not approval for publication or retrieval."
+    }
+  ],
+  "review_before_quoting": [
+    "The homepage FAQ's current listing focus is Coral Gables and 33134; reconcile this with the broader Miami service areas in the original knowledge base.",
+    "Distinguish marketing spend from marketing value, and verify budget and turnaround promises.",
+    "Treat the 90-day listing criterion as a qualification policy, not a sale guarantee.",
+    "Keep contract and tax interpretation with the appropriate human professional."
+  ],
+  "exclude_from_customer_retrieval": [
+    "Preview access codes, credentials, private lead records, call recordings and transcripts.",
+    "Future-dated, draft, withdrawn or unapproved content.",
+    "Illustrative calculators, animated demo figures and placeholder statistics as market evidence.",
+    "Unverified editorial figures presented as current market facts."
+  ]
+}

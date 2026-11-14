@@ -1,0 +1,8 @@
+GCP_PROJECT: "gz-ai-receptionist"
+NEWS_AI_PROVIDER: "vertex"
+NEWS_AI_LOCATION: "global"
+NEWS_CHAT_MODEL: "gemini-3.1-flash-lite"
+NEWS_EMBEDDING_MODEL: "gemini-embedding-001"
+NEWS_DATABASE: "news-rag-staging"
+NEWS_CORPUS_ID: "3b481a3e516494dc9ae7e75d209ea7773e75f7083a71e42dff4dc19c83182a66"
+NEWS_REVIEW_MODE: "true"

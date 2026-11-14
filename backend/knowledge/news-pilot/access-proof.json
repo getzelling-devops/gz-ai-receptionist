@@ -1,0 +1,8 @@
+{
+  "identity": "news-rag-staging@gz-ai-receptionist.iam.gserviceaccount.com",
+  "execution": "news-rag-access-check-9vn99",
+  "news_read_allowed": true,
+  "crm_read_denied": true,
+  "secret_access_denied": true,
+  "method": "Runtime job: news metadata read; nonexistent CRM document read denied; Secret Manager permission test returned no access. No secret value was read."
+}

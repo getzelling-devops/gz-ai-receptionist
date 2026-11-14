@@ -1,0 +1,38 @@
+{
+  "revision": "news-rag-staging-00001-z2q",
+  "unauthenticated_status": 403,
+  "authenticated": true,
+  "response": {
+    "language": "es",
+    "intent": "historical",
+    "review_only": true,
+    "citations": [
+      {
+        "id": "news-20250721-20250727-04",
+        "title": "Miami-Dade Older Condominiums Selling Faster than Newer Units; $1M & Up Condo Sales Continue Rising",
+        "url": "https://www.miamirealtors.com/2025/07/23/miami-dade-older-condominiums-selling-faster-than-newer-units-1m-up-condo-sales-continue-rising/",
+        "published_at": "2025-07-23",
+        "publisher": "MIAMI Association of Realtors®",
+        "digest_start": "2025-07-21",
+        "digest_end": "2025-07-27",
+        "source_verified": false,
+        "number": 1
+      },
+      {
+        "id": "news-20250721-20250727-07",
+        "title": "14 Consecutive Years of Home Price Appreciation for Miami Real Estate",
+        "url": "https://www.miamirealtors.com/2025/07/24/14-consecutive-years-of-home-price-appreciation-for-miami-real-estate/",
+        "published_at": "2025-07-24",
+        "publisher": "MIAMI Association of Realtors®",
+        "digest_start": "2025-07-21",
+        "digest_end": "2025-07-27",
+        "source_verified": false,
+        "number": 2
+      }
+    ],
+    "corpus_id": "6640ef2de310669de1f94134ebfd44e67324e16e9d390c49a41c5f8f594f41a8",
+    "coverage_end": "2025-10-26",
+    "review_notice": "Vista previa del archivo: los resúmenes requieren verificación.",
+    "answer": "El resumen archivado indica que, según datos de junio de 2025, los condominios antiguos (de más de 30 años) en Miami-Dade se están vendiendo más rápido que las unidades nuevas, con una mediana de 62 días en el mercado frente a 79 días [1]. Además, el precio mediano de los condominios aumentó un 6% interanual, alcanzando los 450.000 dólares, marcando 14 años consecutivos de apreciación de precios en el condado [1, 2]."
+  }
+}

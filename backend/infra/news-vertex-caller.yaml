@@ -1,0 +1,6 @@
+title: GetZelling news Vertex caller
+description: Invoke Google-hosted models for the news pilot; no model administration or training.
+stage: GA
+includedPermissions:
+  - aiplatform.endpoints.predict
+  - serviceusage.services.use

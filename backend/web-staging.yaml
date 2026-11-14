@@ -1,0 +1,5 @@
+GCP_PROJECT: "gz-ai-receptionist"
+NEWS_SERVICE_URL: "https://news-rag-staging-z2nypogkaa-ue.a.run.app"
+FIREBASE_AUTH_MODE: "runtime"
+FIRESTORE_DATABASE: "receptionist-staging"
+WEB_RETRIEVAL_TOOL: "true"

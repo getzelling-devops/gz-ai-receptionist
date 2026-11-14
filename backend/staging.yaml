@@ -1,0 +1,13 @@
+# Non-secret routing for GZ Receptionist staging.
+CALENDAR_SERVICE_ACCOUNT: "receptionist-calendar@gz-ai-receptionist.iam.gserviceaccount.com"
+FIRESTORE_DATABASE: "receptionist-staging"
+FIREBASE_AUTH_MODE: "runtime"
+BOOKING_CALENDAR_ID: "c_bf9b23407554879eb6607450b4b9d24de1549b087b6dac6de1b89dce66a55835@group.calendar.google.com"
+BREVO_SENDER: "info@getzelling.com"
+LEAD_EMAIL: "Jmunoz@getzelling.com"
+# Set the account SID from the deployed Cloud Run configuration before deploying.
+TWILIO_ACCOUNT_SID: "SET_TWILIO_ACCOUNT_SID_BEFORE_DEPLOY"
+TWILIO_PHONE_NUMBER: "+17869772774"
+PUBLIC_BASE_URL: "https://receptionist-staging-831469210783.us-east1.run.app"
+VAPI_ASSISTANT_ID: "83dbb599-ccda-4da2-a6ff-d17e9ce0cfd0"
+VAPI_SIP_URI: "sip:gz-7ee5118cb96d4a2d849060a455ac605a@sip.vapi.ai"

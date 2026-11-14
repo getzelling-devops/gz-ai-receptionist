@@ -1,0 +1,116 @@
+{
+  "revision": "news-rag-staging-00002-lh5",
+  "checks": [
+    {
+      "id": "fisher-date-es",
+      "passed": true,
+      "question": "¿Qué decía la noticia de octubre de 2025 sobre Fisher Island y en qué fecha se publicó?",
+      "response": {
+        "language": "es",
+        "intent": "historical",
+        "review_only": true,
+        "citations": [
+          {
+            "id": "news-20251020-20251026-13",
+            "title": "Fisher Island, el código postal más caro de EEUU en 2025 (Fisher Island, the most expensive ZIP code in the USA in 2025)",
+            "url": "https://www.diariolasamericas.com/florida/fisher-island-el-codigo-postal-mas-caro-eeuu-2025-n5384210",
+            "published_at": "2025-10-18",
+            "publisher": "Diario Las Américas (Spanish)",
+            "digest_start": "2025-10-20",
+            "digest_end": "2025-10-26",
+            "source_verified": true,
+            "number": 1
+          }
+        ],
+        "corpus_id": "3b481a3e516494dc9ae7e75d209ea7773e75f7083a71e42dff4dc19c83182a66",
+        "coverage_end": "2025-10-26",
+        "review_notice": "Vista previa privada: extractos contrastados con el texto del medio.",
+        "answer": "Fisher Island se consolidó en octubre de 2025 como el código postal más costoso de Estados Unidos. Según un reporte de Diario Las Américas publicado el 18 de octubre de 2025, el código postal 33109 alcanzó un precio de venta medio de 9.5 millones de dólares, lo que representa un incremento del 65% respecto al año anterior [1]."
+      }
+    },
+    {
+      "id": "older-condo-period",
+      "passed": true,
+      "question": "What reporting period did the July 23, 2025 article use for the 62 versus 79 days comparison for older Miami condos?",
+      "response": {
+        "language": "en",
+        "intent": "historical",
+        "review_only": true,
+        "citations": [
+          {
+            "id": "news-20250721-20250727-04",
+            "title": "Miami-Dade Older Condominiums Selling Faster than Newer Units; $1M & Up Condo Sales Continue Rising",
+            "url": "https://www.miamirealtors.com/2025/07/23/miami-dade-older-condominiums-selling-faster-than-newer-units-1m-up-condo-sales-continue-rising/",
+            "published_at": "2025-07-23",
+            "publisher": "MIAMI Association of Realtors®",
+            "digest_start": "2025-07-21",
+            "digest_end": "2025-07-27",
+            "source_verified": true,
+            "number": 1
+          }
+        ],
+        "corpus_id": "3b481a3e516494dc9ae7e75d209ea7773e75f7083a71e42dff4dc19c83182a66",
+        "coverage_end": "2025-10-26",
+        "review_notice": "Private preview: retained excerpts checked against publisher text.",
+        "answer": "The comparison showing 62 days on market for older Miami-Dade condos versus 79 days for newer units is based on year-to-date data reported by MIAMI Realtors as of July 23, 2025 [1]."
+      }
+    },
+    {
+      "id": "china-rankings",
+      "passed": true,
+      "question": "Which countries ranked third to fifth in April searches, according to the May 27, 2025 China article?",
+      "response": {
+        "language": "en",
+        "intent": "historical",
+        "review_only": true,
+        "citations": [
+          {
+            "id": "news-20250526-20250601-01",
+            "title": "China unseats Colombia as top foreign country searching for Miami homes",
+            "url": "https://therealdeal.com/miami/2025/05/27/china-leads-countries-searching-for-miami-real-estate/",
+            "published_at": "2025-05-27",
+            "publisher": "The Real Deal",
+            "digest_start": "2025-05-26",
+            "digest_end": "2025-06-01",
+            "source_verified": true,
+            "number": 1
+          }
+        ],
+        "corpus_id": "3b481a3e516494dc9ae7e75d209ea7773e75f7083a71e42dff4dc19c83182a66",
+        "coverage_end": "2025-10-26",
+        "review_notice": "Private preview: retained excerpts checked against publisher text.",
+        "answer": "According to the May 27, 2025 report from The Real Deal, Venezuela ranked third with 7.7% of searches on the MIAMI Realtors portal in April 2025 [1]. Canada followed in fourth place at 7.4%, and India rounded out the top five with 5.2% [1]. Please note that these figures represent search interest rather than completed property purchases [1]."
+      }
+    },
+    {
+      "id": "current-market",
+      "passed": true,
+      "question": "How is the Miami real estate market today?",
+      "response": {
+        "language": "en",
+        "intent": "current",
+        "review_only": true,
+        "citations": [],
+        "corpus_id": "3b481a3e516494dc9ae7e75d209ea7773e75f7083a71e42dff4dc19c83182a66",
+        "coverage_end": "2025-10-26",
+        "review_notice": "Private preview: retained excerpts checked against publisher text.",
+        "answer": "I can help you look back at the coverage in this archive, through 2025-10-26. For a view of today’s market, the GetZelling team can help with up-to-date information."
+      }
+    },
+    {
+      "id": "excluded-pipeline",
+      "passed": true,
+      "question": "Which West Palm Beach projects had 60–70% presales, according to the September 4, 2025 condo-pipeline article?",
+      "response": {
+        "language": "en",
+        "intent": "historical",
+        "review_only": true,
+        "citations": [],
+        "corpus_id": "3b481a3e516494dc9ae7e75d209ea7773e75f7083a71e42dff4dc19c83182a66",
+        "coverage_end": "2025-10-26",
+        "review_notice": "Private preview: retained excerpts checked against publisher text.",
+        "answer": "I couldn’t find enough information on that in this archive. Would you like to try another topic or period?"
+      }
+    }
+  ]
+}

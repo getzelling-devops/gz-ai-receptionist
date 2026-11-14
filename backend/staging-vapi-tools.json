@@ -1,0 +1,271 @@
+[
+  {
+    "id": "58aa674f-56b3-4cce-9f4e-834406a922f4",
+    "configuration": {
+      "type": "function",
+      "function": {
+        "name": "check-availability",
+        "description": "Check a requested Miami appointment time, including quarter-hour starts. When changing an existing appointment, include its appointment_id to exclude only that original event. Alternatives require explicit caller agreement.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "date": {
+              "description": "YYYY-MM-DD in America/New_York",
+              "type": "string"
+            },
+            "start": {
+              "description": "The exact caller-requested date and time as ISO 8601 with UTC offset, for example 2026-11-16T10:00:00-05:00. Include whenever the caller specifies a time; it must match date in America/New_York.",
+              "type": "string"
+            },
+            "appointment_type": {
+              "type": "string",
+              "enum": [
+                "listing_presentation",
+                "first_call",
+                "general_inquiry"
+              ]
+            },
+            "bot_say": {
+              "type": "string",
+              "description": "One brief acknowledgment in the caller's current language, with no trailing punctuation. Use Un momento por favor for Spanish and One moment please for English. Never use English when the caller is speaking Spanish."
+            },
+            "appointment_id": {
+              "type": "string",
+              "description": "Internal appointment reference from this conversation. Include when checking a replacement time for an existing booking."
+            }
+          },
+          "required": [
+            "date",
+            "appointment_type",
+            "bot_say"
+          ]
+        }
+      },
+      "server": {
+        "url": "https://receptionist-staging-831469210783.us-east1.run.app/tools/check-availability",
+        "timeoutSeconds": 18,
+        "credentialId": "c963b19d-abd7-42d3-a583-0d94f82719b4"
+      },
+      "async": false,
+      "messages": [
+        {
+          "type": "request-start",
+          "content": ""
+        },
+        {
+          "type": "request-response-delayed",
+          "timingMilliseconds": 8000,
+          "contents": [
+            {
+              "type": "text",
+              "language": "en",
+              "text": "Thank you for your patience. I am still checking that."
+            },
+            {
+              "type": "text",
+              "language": "es",
+              "text": "Gracias por su paciencia. Sigo revisándolo."
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "72f07f58-34f8-4d99-a3ee-af1eb0c2c8da",
+    "configuration": {
+      "type": "function",
+      "function": {
+        "name": "book-appointment",
+        "description": "Create a new agreed appointment. Use reschedule-appointment for a changed time after booking. Do not announce the calendar reservation length unless asked.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "phone": {
+              "description": "Callback number confirmed by caller",
+              "type": "string"
+            },
+            "start": {
+              "description": "ISO timestamp with Miami UTC offset",
+              "type": "string"
+            },
+            "contact_name": {
+              "description": "Caller name",
+              "type": "string"
+            },
+            "meeting_details": {
+              "description": "Meeting location or video details",
+              "type": "string"
+            },
+            "appointment_type": {
+              "type": "string",
+              "enum": [
+                "listing_presentation",
+                "first_call",
+                "general_inquiry"
+              ],
+              "description": "Internal type. In Spanish say Plan de venta for listing_presentation. Do not volunteer meeting duration."
+            },
+            "bot_say": {
+              "type": "string",
+              "description": "One brief acknowledgment in the caller's current language, with no trailing punctuation. Use Un momento por favor for Spanish and One moment please for English. Never use English when the caller is speaking Spanish."
+            },
+            "additional_appointment": {
+              "type": "boolean",
+              "description": "True only if the caller explicitly wants a separate additional meeting of this same type. Never true for a change to the existing appointment time."
+            }
+          },
+          "required": [
+            "start",
+            "appointment_type",
+            "contact_name",
+            "phone",
+            "bot_say"
+          ]
+        }
+      },
+      "server": {
+        "url": "https://receptionist-staging-831469210783.us-east1.run.app/tools/book-appointment",
+        "timeoutSeconds": 18,
+        "credentialId": "c963b19d-abd7-42d3-a583-0d94f82719b4"
+      },
+      "async": false,
+      "messages": [
+        {
+          "type": "request-start",
+          "content": ""
+        },
+        {
+          "type": "request-response-delayed",
+          "timingMilliseconds": 8000,
+          "contents": [
+            {
+              "type": "text",
+              "language": "en",
+              "text": "Thank you for your patience. I am still checking that."
+            },
+            {
+              "type": "text",
+              "language": "es",
+              "text": "Gracias por su paciencia. Sigo revisándolo."
+            }
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "90211a54-e21a-4b97-82ea-6db8e51b5e05",
+    "configuration": {
+      "type": "endCall",
+      "messages": [
+        {
+          "type": "request-start",
+          "content": ""
+        }
+      ],
+      "rejectionPlan": {
+        "conditions": [
+          {
+            "type": "liquid",
+            "liquid": "{% assign completed = false %}{% for msg in messages %}{% if msg.role != 'user' and msg.role != 'system' %}{% if msg.content contains 'GZ_FAREWELL_COMPLETE' or msg.result contains 'GZ_FAREWELL_COMPLETE' or msg.message contains 'GZ_FAREWELL_COMPLETE' %}{% assign completed = true %}{% endif %}{% endif %}{% endfor %}{% if completed %}false{% else %}true{% endif %}"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "id": "4ff6c73a-aad0-4af5-b1a7-5efb6286d028",
+    "configuration": {
+      "type": "function",
+      "function": {
+        "name": "finish-call",
+        "description": "Use only after an explicit goodbye, no-further-help statement, disconnect request or recording objection. Thanks or gracias alone never permits closing; a follow-up question must be answered first. Deliver the full farewell in the latest language through bot_say. After the completion result invoke end_getzelling_call silently and sequentially.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "bot_say": {
+              "type": "string",
+              "description": "The full spoken farewell in the caller's latest language. English: Thank you for calling GetZelling. Please call us anytime you need assistance. Have a wonderful day. Spanish: Gracias por llamar a GetZelling. Puede llamarnos cuando necesite ayuda. Que tenga un excelente día. If the caller requests immediate disconnection or objects to recording, use only Goodbye or Adiós. Never use English for a Spanish conversation."
+            }
+          },
+          "required": [
+            "bot_say"
+          ]
+        }
+      },
+      "server": {
+        "url": "https://receptionist-staging-831469210783.us-east1.run.app/tools/finish-call",
+        "timeoutSeconds": 5,
+        "credentialId": "c963b19d-abd7-42d3-a583-0d94f82719b4"
+      },
+      "async": false,
+      "messages": [
+        {
+          "type": "request-start",
+          "content": ""
+        }
+      ]
+    }
+  },
+  {
+    "id": "6c1ffb80-2ac6-4ff3-aadb-aed3bc19ec62",
+    "configuration": {
+      "type": "function",
+      "function": {
+        "name": "reschedule-appointment",
+        "description": "Move the appointment already created in this conversation to a newly agreed time. Updates the same event, including moves that overlap its old time. Never creates a second event. Speak only the actual outcome, without volunteering a duration.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "appointment_id": {
+              "type": "string",
+              "description": "Internal reference returned by book-appointment for this conversation. Do not read it aloud."
+            },
+            "start": {
+              "type": "string",
+              "description": "New agreed ISO timestamp with UTC offset, including quarter-hour starts."
+            },
+            "bot_say": {
+              "type": "string",
+              "description": "One short acknowledgment in the caller's latest language. Spanish: Un momento por favor. English: One moment please. No trailing punctuation."
+            }
+          },
+          "required": [
+            "appointment_id",
+            "start",
+            "bot_say"
+          ]
+        }
+      },
+      "server": {
+        "url": "https://receptionist-staging-831469210783.us-east1.run.app/tools/reschedule-appointment",
+        "timeoutSeconds": 18,
+        "credentialId": "c963b19d-abd7-42d3-a583-0d94f82719b4"
+      },
+      "async": false,
+      "messages": [
+        {
+          "type": "request-start",
+          "content": ""
+        },
+        {
+          "type": "request-response-delayed",
+          "timingMilliseconds": 8000,
+          "contents": [
+            {
+              "type": "text",
+              "language": "en",
+              "text": "Thank you for your patience. I am still checking that."
+            },
+            {
+              "type": "text",
+              "language": "es",
+              "text": "Gracias por su paciencia. Sigo revisándolo."
+            }
+          ]
+        }
+      ]
+    }
+  }
+]
