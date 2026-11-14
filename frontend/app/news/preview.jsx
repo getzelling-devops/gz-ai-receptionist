@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import MicrophoneHelp from "../microphone-help";
 import { useWebVoice } from "../web-voice";
 
 const copy = {
@@ -63,15 +64,19 @@ const widgetCopy = {
   },
 };
 
-export default function NewsPreview({ sessionToken, sessionId }) {
-  const [voiceState, setVoiceState] = useState("text");
+export default function NewsPreview({ sessionToken, sessionId, startWithVoice = false, initialHistory = [], initialLanguage = "en" }) {
+  const [voiceState, setVoiceState] = useState(startWithVoice ? "consent" : "text");
   const [session, setSession] = useState(() => sessionId || crypto.randomUUID());
+  const [micIssue,setMicIssue] = useState(false);
+  const [isEmbedded,setIsEmbedded] = useState(false);
+  const voiceTab=useRef(null);
+  useEffect(()=>setIsEmbedded(window.parent!==window),[]);
   const previous = useRef(null);
   const voiceLock = useRef(false);
   const requestLock = useRef(false);
-  const [language, setLanguage] = useState("en");
+  const [language, setLanguage] = useState(initialLanguage);
   const [question, setQuestion] = useState("");
-  const [turns, setTurns] = useState([]);
+  const [turns, setTurns] = useState(initialHistory);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [enterToSend, setEnterToSend] = useState(true);
@@ -108,11 +113,28 @@ export default function NewsPreview({ sessionToken, sessionId }) {
       ({ role, content: content.slice(0, 1200) })) };
   }
 
+  function openVoiceTab() {
+    const tab=window.open(location.origin+"/#voice","gizelle-voice");
+    if (!tab) setError(language==="es"?"Permita abrir una pestaña para continuar, o siga escribiendo.":"Allow a new tab to open, or continue typing here.");
+    voiceTab.current=tab;
+  }
+
+  useEffect(()=>{
+    const relay=e=>{
+      if(e.origin!==location.origin || e.source!==voiceTab.current || e.data?.type!=="gizelle:voice-ready") return;
+      e.source.postMessage({type:"gizelle:voice-session",session_id:session,session_token:sessionToken,
+        language,history:context().history},location.origin);
+    };
+    window.addEventListener("message",relay);
+    return ()=>window.removeEventListener("message",relay);
+  },[session,sessionToken,language,turns]);
+
   async function agree() {
     if (voiceLock.current) return;
-    voiceLock.current = true; setError(""); setVoiceState("connecting");
+    voiceLock.current = true; setError(""); setMicIssue(false); setVoiceState("permission");
     try {
       await voice.prepareCall();
+      setVoiceState("connecting");
       const response = await fetch("/api/widget/consent", { method: "POST",
         headers: { "Content-Type": "application/json", ...(sessionToken ? { Authorization: `Bearer ${sessionToken}` } : {}) },
         body: JSON.stringify({ ...context(), version: "web-voice-v1", accepted: true }) });
@@ -120,13 +142,12 @@ export default function NewsPreview({ sessionToken, sessionId }) {
       await voice.startCall();
     } catch (failure) {
       voice.cancelCall();
-      voiceLock.current = false; setVoiceState("text");
-      if (!/meeting.*ended|meeting-ended|ejection/i.test(String(failure?.message || failure)))
-        setError(failure?.message === "MICROPHONE_DENIED"
-          ? (language === "es" ? "Permita el acceso al micrófono en su navegador y vuelva a intentarlo. También puede seguir escribiendo." : "Allow microphone access in your browser and try again. You can also continue typing.")
-          : failure?.message === "MICROPHONE_UNAVAILABLE"
-          ? (language === "es" ? "No se pudo acceder al micrófono. Abra esta página en Safari o Chrome y vuelva a intentarlo." : "The microphone could not be accessed. Open this page in Safari or Chrome and try again.")
-          : w.failure);
+      voiceLock.current = false;
+      const microphoneFailure = /^MICROPHONE_/.test(failure?.message || "");
+      setMicIssue(microphoneFailure);
+      setVoiceState(microphoneFailure ? "consent" : "text");
+      if (!microphoneFailure && !/meeting.*ended|meeting-ended|ejection/i.test(String(failure?.message || failure)))
+        setError(w.failure);
     }
   }
 
@@ -228,7 +249,7 @@ export default function NewsPreview({ sessionToken, sessionId }) {
       </div>
     </section>}
     </div>
-    <footer className="widget-composer shrink-0 border-t border-hairline bg-paper py-3">
+    <footer className="widget-composer max-h-[65dvh] shrink-0 overflow-y-auto border-t border-hairline bg-paper py-3">
 
     {error && <p role="alert" className="text-sm text-[#8C3B2A]">{error}</p>}
     {voiceState === "text" && <form id="gizelle-form" onSubmit={ask} className="space-y-3">
@@ -249,7 +270,7 @@ export default function NewsPreview({ sessionToken, sessionId }) {
           <button type="submit" disabled={busy || !question.trim()}
             className="min-h-11 rounded bg-bronze px-5 text-sm font-medium text-white transition-colors duration-[330ms] hover:bg-[#B18957] active:bg-[#5C3E26]">{c.send}</button>
           <button type="button" disabled={busy} className="min-h-11 rounded border border-bronze px-3 text-sm text-bronze"
-            onClick={() => { setError(""); setVoiceState("consent"); }}>{w.voice}</button>
+            onClick={() => { setError(""); setMicIssue(false); setVoiceState("consent"); }}>{w.voice}</button>
         </div>
         <div className="ml-auto text-right">
           <label className="flex min-h-11 items-center justify-end gap-1.5 text-xs text-[#6E6656]">
@@ -269,7 +290,9 @@ export default function NewsPreview({ sessionToken, sessionId }) {
     <div className="mt-2 flex flex-wrap items-center gap-3 text-sm">
       {voiceState === "consent" && <><p className="w-full">{w.consent}</p>
         <button className="min-h-11 rounded bg-bronze px-3 text-white" onClick={agree}>{w.agree}</button>
-        <button className="min-h-11 text-navy" onClick={() => setVoiceState("text")}>{w.decline}</button></>}
+        <button className="min-h-11 text-navy" onClick={() => { setMicIssue(false); setVoiceState("text"); }}>{w.decline}</button></>}
+      {voiceState === "consent" && <MicrophoneHelp language={language} blocked={micIssue} onOpenTab={isEmbedded && sessionToken ? openVoiceTab : null} />}
+      {voiceState === "permission" && <p role="status">{language==="es"?"Busque la solicitud de micrófono del navegador y elija Permitir…":"Look for your browser’s microphone prompt and choose Allow…"}</p>}
       {voiceState === "connecting" && <p role="status">{w.connecting}</p>}
       {voiceState === "active" && <><p role="status">{w.speaking}</p>
         <button className="min-h-11 rounded border border-bronze px-3" onClick={() => voice.endCall({force:true})}>{w.end}</button></>}
