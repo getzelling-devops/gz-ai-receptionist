@@ -112,15 +112,21 @@ export default function NewsPreview({ sessionToken, sessionId }) {
     if (voiceLock.current) return;
     voiceLock.current = true; setError(""); setVoiceState("connecting");
     try {
+      await voice.prepareCall();
       const response = await fetch("/api/widget/consent", { method: "POST",
         headers: { "Content-Type": "application/json", ...(sessionToken ? { Authorization: `Bearer ${sessionToken}` } : {}) },
         body: JSON.stringify({ ...context(), version: "web-voice-v1", accepted: true }) });
       if (!response.ok) throw new Error();
       await voice.startCall();
     } catch (failure) {
+      voice.cancelCall();
       voiceLock.current = false; setVoiceState("text");
       if (!/meeting.*ended|meeting-ended|ejection/i.test(String(failure?.message || failure)))
-        setError(w.failure);
+        setError(failure?.message === "MICROPHONE_DENIED"
+          ? (language === "es" ? "Permita el acceso al micrófono en su navegador y vuelva a intentarlo. También puede seguir escribiendo." : "Allow microphone access in your browser and try again. You can also continue typing.")
+          : failure?.message === "MICROPHONE_UNAVAILABLE"
+          ? (language === "es" ? "No se pudo acceder al micrófono. Abra esta página en Safari o Chrome y vuelva a intentarlo." : "The microphone could not be accessed. Open this page in Safari or Chrome and try again.")
+          : w.failure);
     }
   }
 

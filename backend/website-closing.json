@@ -1,0 +1,71 @@
+{
+  "finish_tool_id": "b8cc16c9-89ec-44b2-9319-95ce0f0bff07",
+  "finish_configuration": {
+    "type": "function",
+    "function": {
+      "name": "finish-call",
+      "description": "Website voice only. After explicit goodbye, no further help, disconnect request or recording objection, deliver the single full farewell with bot_say. Wait for GZ_FAREWELL_COMPLETE, then invoke close_gizelle_web silently. Never use in text or for thanks alone.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "bot_say": {
+            "type": "string",
+            "description": "The full spoken farewell in the caller's latest language. English: Thank you for calling GetZelling. Please call us anytime you need assistance. Have a wonderful day. Spanish: Gracias por llamar a GetZelling. Puede llamarnos cuando necesite ayuda. Que tenga un excelente día. If the caller requests immediate disconnection or objects to recording, use only Goodbye or Adiós. Never use English for a Spanish conversation."
+          }
+        },
+        "required": [
+          "bot_say"
+        ]
+      }
+    },
+    "server": {
+      "url": "https://receptionist-staging-831469210783.us-east1.run.app/tools/finish-call",
+      "timeoutSeconds": 5,
+      "credentialId": "c963b19d-abd7-42d3-a583-0d94f82719b4"
+    },
+    "async": false,
+    "messages": [
+      {
+        "type": "request-start",
+        "content": ""
+      }
+    ]
+  },
+  "close_tool_id": "208b0b6d-5084-45bc-93c1-16ab10567b09",
+  "close_update": {
+    "messages": [
+      {
+        "type": "request-start",
+        "content": ""
+      }
+    ],
+    "function": {
+      "name": "close_gizelle_web",
+      "description": "Silently close only after finish-call returned GZ_FAREWELL_COMPLETE. Never speak another goodbye.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "language": {
+            "type": "string",
+            "enum": [
+              "en",
+              "es"
+            ]
+          }
+        },
+        "required": [
+          "language"
+        ]
+      }
+    },
+    "rejectionPlan": {
+      "conditions": [
+        {
+          "type": "liquid",
+          "liquid": "{% assign completed = false %}{% for msg in messages %}{% if msg.role != 'user' and msg.role != 'system' %}{% if msg.content contains 'GZ_FAREWELL_COMPLETE' or msg.result contains 'GZ_FAREWELL_COMPLETE' or msg.message contains 'GZ_FAREWELL_COMPLETE' %}{% assign completed = true %}{% endif %}{% endif %}{% endfor %}{% if completed %}false{% else %}true{% endif %}"
+        }
+      ]
+    }
+  },
+  "instructions": "first invoke finish-call with bot_say in their latest language. English: “Thank you for calling GetZelling. Please call us anytime at seven eight six, nine seven seven, two seven seven four. Have a wonderful day.” Spanish: “Gracias por llamar a GetZelling. Puede volver a llamarnos al siete ocho seis, nueve siete siete, dos siete siete cuatro. Que tenga un excelente día.” Wait for its GZ_FAREWELL_COMPLETE result, then invoke close_gizelle_web silently with the latest language. Never invoke them in parallel or speak a separate goodbye. For an immediate disconnect or recording objection use only Goodbye or Adiós in finish-call."
+}

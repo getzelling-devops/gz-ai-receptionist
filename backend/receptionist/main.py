@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import time
 from typing import Annotated
 
 from fastapi import Depends, FastAPI, HTTPException
@@ -104,6 +105,9 @@ def tools(tool_name: str, message: Message):
             if tool_name == "finish-call":
                 # Vapi finishes the reserved bot_say playback before invoking us.
                 # Closing must not depend on Calendar, Firestore or email delivery.
+                # Let the completed farewell's final audio packets reach the caller
+                # before the model receives permission to hang up the phone leg.
+                time.sleep(1.0)
                 results.append({"toolCallId": call["id"], "result":
                                 "GZ_FAREWELL_COMPLETE. Now invoke end_getzelling_call without additional speech."})
                 continue
