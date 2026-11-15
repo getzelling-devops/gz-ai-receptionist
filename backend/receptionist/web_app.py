@@ -7,7 +7,7 @@ import os
 import secrets
 from datetime import UTC, datetime, timedelta
 from typing import Annotated
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from fastapi import Depends, FastAPI, HTTPException, Request
 from firebase_admin import firestore
@@ -141,6 +141,26 @@ def voice(value: Start, member: Visitor):
     call = service.voice(service.Join(session=session["session_id"], ticket=session["voice_ticket"]))
     ref.update({"voice_ticket": firestore.DELETE_FIELD, "call_id": call["id"]})
     return call
+
+
+class CallStatus(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    call_id: UUID
+
+
+@app.post("/call-status")
+def call_status(value: CallStatus, member: Visitor):
+    ref, session = member
+    if str(value.call_id) != session.get("call_id"):
+        raise HTTPException(403, "Call session mismatch")
+    try:
+        call = service.provider("call/" + str(value.call_id), method="GET")
+        reason = call.get("endedReason") or None
+        ref.update({"last_end_reason": reason, "call_checked_at": firestore.SERVER_TIMESTAMP})
+        return {"status": call.get("status"), "ended_reason": reason}
+    except Exception as exc:
+        log.warning("Call status unavailable (%s)", type(exc).__name__)
+        raise HTTPException(503, "Call status unavailable") from None
 
 
 @app.post("/tools/market-insights")

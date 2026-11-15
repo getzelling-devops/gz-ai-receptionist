@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import MicrophoneHelp from "../microphone-help";
 import { useWebVoice } from "../web-voice";
+import { formatTranscriptPhones } from "../contact-format.mjs";
 import { Icon } from "../icons";
 
 // Topic chips show a short label and send a fuller question to the real chat backend.
@@ -51,7 +52,7 @@ const widgetCopy = {
     permission: "Look for your browser’s microphone prompt and choose Allow…", connecting: "Connecting…",
     voiceCall: "Live voice call", listening: "Listening", speaking: "Gizelle is speaking", muted: "You are muted",
     mute: "Mute", unmute: "Unmute", end: "End call", callHint: "The transcript updates live as you both speak.",
-    started: "Voice call started", ended: "Call ended", elapsed: "Call time",
+    started: "Voice call started", ended: "Call ended", interrupted: "Call interrupted", elapsed: "Call time",
     failure: "Gizelle is unavailable. Please try again or email the team.",
     disclosure: "By chatting, you agree to our", terms: "terms", and: "and", privacy: "recording policy",
   },
@@ -69,7 +70,7 @@ const widgetCopy = {
     permission: "Busca la solicitud de micrófono del navegador y elige Permitir…", connecting: "Conectando…",
     voiceCall: "Llamada de voz en vivo", listening: "Escuchando", speaking: "Gizelle está hablando", muted: "Estás en silencio",
     mute: "Silenciar", unmute: "Activar micrófono", end: "Terminar llamada", callHint: "La transcripción se actualiza en vivo mientras hablan.",
-    started: "Llamada de voz iniciada", ended: "Llamada terminada", elapsed: "Duración de la llamada",
+    started: "Llamada de voz iniciada", ended: "Llamada terminada", interrupted: "Llamada interrumpida", elapsed: "Duración de la llamada",
     failure: "Gizelle no está disponible. Inténtalo de nuevo o escribe al equipo.",
     disclosure: "Al chatear, aceptas nuestros", terms: "términos", and: "y la", privacy: "política de grabación",
   },
@@ -148,21 +149,28 @@ export default function NewsPreview({ sessionToken, sessionId, startWithVoice = 
   const locked = busy || voiceState !== "text";
 
   function resetCallDisplay() { setMuted(false); setSpeaking(false); setPartial(null); }
-  function callEndedDisplay() {
+  function callEndedDisplay({unexpected = false} = {}) {
     if (callStarted.current === null) return;
     const seconds = Math.floor((Date.now() - callStarted.current) / 1000);
     callStarted.current = null; resetCallDisplay();
-    setTurns(items => [...items, { divider: "ended", seconds }]);
+    setTurns(items => [...items, { divider: unexpected ? "interrupted" : "ended", seconds }]);
   }
 
   const voice = useWebVoice({
     session, sessionToken,
     onCallStart: () => {
+      if (callStarted.current !== null) return;
       resetCallDisplay(); callStarted.current = Date.now(); setCallSeconds(0);
       setTurns(items => [...items, { divider: "started" }]);
       setVoiceState("active");
     },
-    onCallEnd: () => { callEndedDisplay(); setError(""); previous.current = null; voiceLock.current = false; setVoiceState("text"); },
+    onCallEnd: (outcome = {}) => {
+      callEndedDisplay(outcome);
+      setError(outcome.unexpected ? (language === "es"
+        ? "Se interrumpió la conexión de voz. Su conversación sigue aquí. Pulse Hablar en vivo para volver a llamar."
+        : "The voice connection was interrupted. Your conversation is still here. Select Talk live to try again.") : "");
+      previous.current = null; voiceLock.current = false; setVoiceState("text");
+    },
     onError: error => {
       if (/meeting.*ended|meeting-ended|ejection/i.test([error?.message, JSON.stringify(error)].join(" "))) {
         callEndedDisplay(); previous.current = null; voiceLock.current = false; setVoiceState("text"); setError(""); return;
@@ -269,6 +277,7 @@ export default function NewsPreview({ sessionToken, sessionId, startWithVoice = 
   }
 
   for (const turn of grouped) {
+    if (turn.content) turn.content = formatTranscriptPhones(turn.content);
     if (turn.voice && turn.role === "assistant") {
       turn.content = turn.content
         .replace(/7[\s.,-]*8[\s.,-]*6[\s.,-]*9[\s.,-]*7[\s.,-]*7[\s.,-]*2[\s.,-]*7[\s.,-]*7[\s.,-]*4\b/g, "786-977-2774")
@@ -393,7 +402,7 @@ export default function NewsPreview({ sessionToken, sessionId, startWithVoice = 
       <section className="flex flex-col gap-2.5" role="log" aria-label="Conversation" aria-live="polite" aria-relevant="additions">
         <Bubble role="assistant">{w.greet}</Bubble>
         {grouped.map((turn, i) => turn.divider
-          ? <Divider key={i}>{turn.divider === "started" ? w.started : `${w.ended} · ${clock(turn.seconds)}`}</Divider>
+          ? <Divider key={i}>{turn.divider === "started" ? w.started : `${turn.divider === "interrupted" ? w.interrupted : w.ended} · ${clock(turn.seconds)}`}</Divider>
           : <Bubble key={i} role={turn.role}>
             {turn.content}
             {partialInline && i === grouped.length - 1 && <span style={{ opacity: 0.6 }}> {partial.content}</span>}

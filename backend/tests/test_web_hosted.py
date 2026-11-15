@@ -44,6 +44,22 @@ class HostedBoundary(unittest.TestCase):
             self.assertEqual(reply.status_code, 403)
             voice.assert_not_called()
 
+    def test_call_status_is_private_to_its_visitor(self):
+        call_id = str(uuid4())
+        self.ref.get.return_value.to_dict.return_value = {
+            "session_id": self.session, "call_id": call_id,
+            "expires_at": datetime.now(UTC) + timedelta(hours=1)}
+        with patch.object(web.service, "provider", return_value={
+                "status": "ended", "endedReason": "customer-ended-call",
+                "transcript": "Private conversation"}) as provider:
+            self.assertEqual(self.client.post("/call-status", json={"call_id": call_id}).status_code, 401)
+            headers = {"Authorization": "Bearer valid-session"}
+            self.assertEqual(self.client.post("/call-status", json={"call_id": str(uuid4())}, headers=headers).status_code, 403)
+            provider.assert_not_called()
+            response = self.client.post("/call-status", json={"call_id": call_id}, headers=headers)
+            self.assertEqual(response.json(), {"status": "ended", "ended_reason": "customer-ended-call"})
+            provider.assert_called_once_with("call/" + call_id, method="GET")
+
     def test_signed_market_tool_uses_shared_service_and_rejects_phone_assistant(self):
         key = b"test-webhook-key"
         message = {"type": "tool-calls", "call": {"id": str(uuid4()),

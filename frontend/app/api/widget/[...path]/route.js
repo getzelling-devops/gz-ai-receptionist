@@ -1,5 +1,5 @@
 // This loopback bridge is exclusive to the private operator preview.
-const paths = new Map([["session", "session"], ["chat", "chat"], ["consent", "consent"], ["call/web", "voice"]]);
+const paths = new Map([["session", "session"], ["chat", "chat"], ["call-status", "call-status"], ["consent", "consent"], ["call/web", "voice"]]);
 let pending = 0;
 
 export async function POST(request, context) {

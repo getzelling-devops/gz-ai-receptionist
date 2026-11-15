@@ -8,6 +8,8 @@ import httpx
 from firebase_admin import firestore
 
 from .config import secret
+from .contacts import confirmed_email, us_phone
+from .mail import render
 
 
 def key_for(*parts):
@@ -37,7 +39,10 @@ def extract_lead(message):
     return {
         "call_id": call["id"],
         "name": string(fields.get("name"), customer.get("name")),
-        "phone": string(fields.get("phone"), customer.get("number")),
+        "phone": us_phone(string(fields.get("phone"), customer.get("number"))),
+        "email": confirmed_email(fields.get("email"), fields.get("email_confirmed")),
+        "email_confirmed": fields.get("email_confirmed") is True,
+        "channel": "web" if call.get("type") == "webCall" else "phone",
         "lead_type": string(fields.get("lead_type")),
         "summary": string(fields.get("summary"), analysis.get("summary"), message.get("summary")),
         "transcript": None if consent_missing else string(artifact.get("transcript"), message.get("transcript")),
@@ -49,8 +54,9 @@ def extract_lead(message):
     }
 
 
-def notification(to, subject, body):
-    return {"to": to, "subject": subject, "body": body, "status": "pending"}
+def notification(to, subject, body, lead=None):
+    return {"to": to, "subject": subject, "body": body, "html": render(subject, body, lead),
+            "reply_to": confirmed_email((lead or {}).get("email"), (lead or {}).get("email_confirmed")), "status": "pending"}
 
 
 def save_lead(db, lead):
@@ -63,8 +69,8 @@ def save_lead(db, lead):
     if len(transcript.encode()) > 512_000:
         chunks = [transcript[i:i + 100_000] for i in range(0, len(transcript), 100_000)]
         data.update(transcript=None, transcript_chunks=len(chunks))
-    body = "\n".join(f"{key}: {lead[key] or 'Unknown'}" for key in ("name", "phone", "lead_type", "summary"))
-    mail = notification(os.getenv("LEAD_EMAIL", "activate@getzelling.com"), "GetZelling receptionist lead", body)
+    body = "\n".join(f"{key}: {lead.get(key) or 'Unknown'}" for key in ("name", "email", "phone", "lead_type", "summary"))
+    mail = notification(os.getenv("LEAD_EMAIL", "activate@getzelling.com"), "GetZelling · New Gizelle inquiry", body, lead)
 
     @firestore.transactional
     def persist(tx):
@@ -129,6 +135,8 @@ def deliver(db, ref):
                           headers={"api-key": api_key}, json={
                               "sender": {"email": sender, "name": "GetZelling"},
                               "to": [{"email": address}], "subject": job["subject"],
+                              "htmlContent": job.get("html") or render(job["subject"], job["body"]),
+                              **({"replyTo": {"email": job["reply_to"]}} if job.get("reply_to") else {}),
                               "textContent": job["body"], "headers": {"idempotencyKey": delivery_key},
                           })
     if response.status_code != 201:

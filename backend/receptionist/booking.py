@@ -12,6 +12,7 @@ from google.auth import impersonated_credentials
 from google.auth.transport.requests import AuthorizedSession
 
 from .config import PROJECT
+from .contacts import us_phone
 from .records import key_for
 
 MIAMI = ZoneInfo("America/New_York")
@@ -193,6 +194,8 @@ def book(db, cal, op_id, args, conversation=None):
     callback = args.get("phone")
     if not all(isinstance(v, str) and 0 < len(v.strip()) <= 160 for v in (contact, callback)):
         raise ToolError("Ask for the contact name and callback number before booking.")
+    callback = us_phone(callback)
+    args = {**args, "phone": callback}
     details = args.get("meeting_details", "")
     if not isinstance(details, str) or len(details) > 1000:
         raise ToolError("Keep meeting location and contact details under 1,000 characters.")

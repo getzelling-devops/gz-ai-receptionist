@@ -87,3 +87,31 @@ test("mute stops sending microphone audio without ending the call",async()=>{
   f.voice.setMuted(false);
   assert.equal(f.Peer.instance.muted,false);
 });
+
+test("duplicate SDK call-start events announce a single call",async()=>{
+  let started=0;
+  const f=fixture(false,{onCallStart(){started++;}});
+  await f.voice.prepareCall();await f.voice.startCall();
+  f.Peer.instance.emit("call-start");f.Peer.instance.emit("call-start");
+  assert.equal(started,1);
+});
+
+test("setup timeout cannot disconnect an already active call",async()=>{
+  const f=fixture();
+  await f.voice.prepareCall();
+  f.Peer.instance.reconnect=function(){this.emit("call-start");return new Promise(()=>{});};
+  const pending=f.voice.startCall();
+  await new Promise(resolve=>setImmediate(resolve));
+  const timeout=[...f.timers.values()].find(t=>t.ms===35000);
+  assert.ok(timeout);timeout.fn();await pending;
+  assert.equal(f.Peer.instance.stops,0);
+  assert.equal(f.stopped,0);
+});
+
+test("an unexplained active-call end is reported as an interruption",async()=>{
+  const outcomes=[];
+  const f=fixture(false,{onCallEnd(value){outcomes.push(value);}});
+  await f.voice.prepareCall();await f.voice.startCall();
+  f.Peer.instance.emit("call-end");
+  assert.equal(outcomes[0].unexpected,true);
+});

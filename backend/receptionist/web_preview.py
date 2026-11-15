@@ -54,7 +54,7 @@ def clients():
     return _clients(int(monotonic() // 240) + 1 if os.getenv("WEB_PREVIEW_GCLOUD_USER") == "true" else 0)
 
 
-def provider(path, body):
+def provider(path, body=None, method="POST"):
     _, manager = clients()
     key = manager.access_secret_version(
         name=f"projects/{PROJECT}/secrets/vapi-api-key/versions/latest", timeout=8
@@ -63,7 +63,8 @@ def provider(path, body):
         key = jwt.encode({"orgId": ORG_ID, "exp": int(time.time()) + 60, "token": {
             "tag": "public", "restrictions": {"allowedAssistantIds": [ASSISTANT_ID]},
         }}, key, algorithm="HS256")
-    response = httpx.post("https://api.vapi.ai/" + path, json=body,
+    request = httpx.get if method == "GET" else httpx.post
+    response = request("https://api.vapi.ai/" + path, **({"json": body} if method != "GET" else {}),
                           headers={"Authorization": "Bearer " + key}, timeout=65)
     if not response.is_success:
         log.warning("Staging %s returned %d", path, response.status_code)
