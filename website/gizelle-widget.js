@@ -33,15 +33,22 @@
       opacity:0;transform:translateY(16px);pointer-events:none;transition:opacity .3s ease,transform .3s ease}
     .dock.in{opacity:1;transform:none;pointer-events:auto}
     .dock[hidden]{display:none}
-    .bar{display:flex;height:52px;background:var(--navy);border-radius:4px;overflow:hidden;box-shadow:var(--elevation-card)}
-    .bar button{border:0;background:transparent;color:#fff;transition:background-color var(--transition)}
-    .bar button:hover{background:var(--midnight-surface)}
-    .bar button:focus-visible{outline-color:#F4F1E8;outline-offset:-4px}
+    /* Navy on light pages; Stone & Paper over dark sections so it stays visible. */
+    .bar{--bar-bg:var(--navy);--bar-fg:#fff;--bar-sub:var(--midnight-muted);--bar-hover:var(--midnight-surface);
+      --bar-split:var(--midnight-border);--bar-wave:var(--bronze-light);--bar-focus:#F4F1E8;
+      display:flex;height:52px;background:var(--bar-bg);border-radius:4px;overflow:hidden;box-shadow:var(--elevation-card);
+      transition:background-color var(--transition)}
+    .bar.light{--bar-bg:#F4F1EA;--bar-fg:var(--navy);--bar-sub:#6E6656;--bar-hover:var(--border);
+      --bar-split:rgba(11,37,69,.14);--bar-wave:#8C6844;--bar-focus:var(--navy)}
+    .bar button{border:0;background:transparent;color:var(--bar-fg);transition:background-color var(--transition),color var(--transition)}
+    .bar button:hover{background:var(--bar-hover)}
+    .bar button:focus-visible{outline-color:var(--bar-focus);outline-offset:-4px}
     .talk{display:flex;align-items:center;gap:12px;padding:0 16px;text-align:left}
+    .wave{display:flex;color:var(--bar-wave);transition:color var(--transition)}
     .lines{display:flex;flex-direction:column;gap:1px}
     .title{font-size:15px;font-weight:500;line-height:1.2}
-    .sub{font-size:12px;line-height:1.2;color:var(--midnight-muted)}
-    .split{width:1px;background:var(--midnight-border)}
+    .sub{font-size:12px;line-height:1.2;color:var(--bar-sub);transition:color var(--transition)}
+    .split{width:1px;background:var(--bar-split);transition:background-color var(--transition)}
     .chat{width:56px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:0}
     .nudge{width:240px;padding:12px 14px;display:flex;gap:10px;align-items:flex-start;background:#fff;border:1px solid var(--border);
       border-radius:12px 12px 4px 12px;box-shadow:var(--elevation-card);opacity:0;transform:translateY(8px);
@@ -66,7 +73,7 @@
     </div>
     <div class="bar">
       <button type="button" class="talk" aria-expanded="false" aria-controls="gizelle-panel">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#D6A96A" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M2 10v3M6 6v11M10 3v18M14 8v7M18 5v13M22 10v3"/></svg>
+        <span class="wave"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M2 10v3M6 6v11M10 3v18M14 8v7M18 5v13M22 10v3"/></svg></span>
         <span class="lines"><span class="title">${t.talk}</span><span class="sub">${t.live}</span></span>
       </button>
       <span class="split" aria-hidden="true"></span>
@@ -99,6 +106,43 @@
   };
   window.addEventListener("resize", placeDock);
 
+  // Switch the launcher to its light look while it sits over a dark section (navy bands, the
+  // Buyers and Sellers screens). It reads the first solid background under the launcher's centre.
+  const bar = shadow.querySelector(".bar");
+  const colour = value => {
+    const m = /rgba?\(([^)]+)\)/.exec(value || "");
+    if (!m) return null;
+    const [r, g, b, a = 1] = m[1].split(/[\s,/]+/).filter(Boolean).map(Number);
+    return {r, g, b, a};
+  };
+  const isDark = c => (0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b) / 255 < 0.35;
+  function backdropIsDark() {
+    const r = bar.getBoundingClientRect();
+    if (!r.width) return false;
+    for (const el of document.elementsFromPoint(r.left + r.width / 2, r.top + r.height / 2)) {
+      if (el === root) continue;
+      const style = getComputedStyle(el);
+      const solid = colour(style.backgroundColor);
+      if (solid && solid.a >= 0.5) return isDark(solid);
+      const gradient = style.backgroundImage.includes("gradient") && colour(style.backgroundImage);
+      if (gradient && gradient.a >= 0.5) return isDark(gradient);
+    }
+    return false;
+  }
+  let toneQueued = false;
+  const updateTone = () => {
+    if (toneQueued) return;
+    toneQueued = true;
+    requestAnimationFrame(() => {
+      toneQueued = false;
+      if (!dock.hidden) bar.classList.toggle("light", backdropIsDark());
+    });
+  };
+  document.addEventListener("scroll", updateTone, {capture: true, passive: true});
+  window.addEventListener("resize", updateTone);
+  // Views can change without scrolling (Buyers list and map, slideshows), so also check twice a second.
+  setInterval(updateTone, 500);
+
   // Show the launcher after the visitor scrolls past the hero, or after 8 seconds.
   let shown = false;
   const reveal = () => {
@@ -107,6 +151,7 @@
     document.removeEventListener("scroll", onScroll, true);
     dock.hidden = false;
     placeDock();
+    bar.classList.toggle("light", backdropIsDark());
     requestAnimationFrame(() => requestAnimationFrame(() => dock.classList.add("in")));
     let seen = false;
     try { seen = sessionStorage.getItem("gz-gizelle-nudge") === "1"; sessionStorage.setItem("gz-gizelle-nudge", "1"); } catch {}

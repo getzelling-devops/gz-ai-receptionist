@@ -52,9 +52,9 @@ export default function PreviewAccess() {
     finally { setPending(false); }
   }
 
-  if (!mounted) return <main role="status" className="p-6 text-navy">Opening Gizelle…</main>;
+  if (!mounted) return <main role="status" className="min-h-dvh bg-white p-6 text-navy">Opening Gizelle…</main>;
   if (access) return <Preview sessionId={access.session_id} sessionToken={access.session_token} startWithVoice={access.startWithVoice} initialLanguage={access.initialLanguage} initialHistory={access.initialHistory} />;
-  if (embedded) return <main role="status" className="p-6 text-navy">{error || "Opening Gizelle…"}</main>;
+  if (embedded) return <main role="status" className="min-h-dvh bg-white p-6 text-navy">{error || "Opening Gizelle…"}</main>;
   return <main className="mx-auto flex min-h-dvh w-full max-w-[450px] flex-col justify-center gap-4 px-6">
     <p className="text-xs font-medium uppercase tracking-[0.16em] text-bronze">GetZelling</p>
     <h1 className="text-2xl font-medium text-navy">Gizelle preview</h1>
