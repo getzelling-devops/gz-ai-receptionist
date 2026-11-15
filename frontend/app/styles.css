@@ -14,22 +14,74 @@
   font-weight: 500;
   font-display: swap;
 }
+/* GetZelling design system tokens (Stone & Paper, with Midnight for the call header).
+   Values come from the Gizelle design handoff tokens. */
 @theme {
   --font-sans: Geist, Arial, sans-serif;
   --color-navy: #0b2545;
   --color-bronze: #8c6844;
+  --color-bronze-hover: #b18957;
+  --color-bronze-active: #5c3e26;
+  --color-bronze-light: #d6a96a;
+  --color-gold-hover: #c9ae82;
   --color-paper: #f4f1ea;
   --color-ink: #201c16;
+  --color-body: #4a4436;
+  --color-muted: #6e6656;
+  --color-tertiary: #716d62;
   --color-hairline: #e4dccd;
+  --color-silver: #d0d1d2;
+  --color-error: #8c3b2a;
+  --color-midnight: #0b2545;
+  --color-midnight-surface: #12305c;
+  --color-midnight-text: #f4f1e8;
+  --color-midnight-body: #cdd4e0;
+  --color-midnight-muted: #aeb9d1;
+  --color-midnight-border: rgb(255 255 255 / 0.14);
+  --color-success-dark: #9fd98c;
+  --shadow-card: 0 10px 40px rgb(11 37 69 / 0.08);
 }
 body { background: var(--color-paper); color: var(--color-ink); font-family: var(--font-sans); }
 :focus-visible { outline: 2px solid var(--color-navy); outline-offset: 2px; }
 button { cursor: pointer; }
 button:disabled { opacity: 0.55; cursor: default; }
-.widget-composer { padding-bottom: max(0.75rem, env(safe-area-inset-bottom)); }
-.widget-composer textarea { max-height: 7rem; }
-@media (max-height: 550px) {
-  .widget-shell header h1 { font-size: 20px; }
-  .widget-shell header { padding-block: 4px; }
-  .widget-composer textarea { max-height: 4rem; }
+
+/* Gizelle panel. Simple layout uses utilities; these cover multi-state controls and motion. */
+.gz-ease { transition: color .33s ease, background-color .33s ease, border-color .33s ease, box-shadow .33s ease; }
+
+/* Secondary button: bronze at rest, light bronze on hover, navy when pressed or selected. */
+.gz-secondary { background: #fff; color: var(--color-bronze); box-shadow: inset 0 0 0 1px var(--color-bronze); }
+.gz-secondary:not(:disabled):hover { color: var(--color-bronze-light); box-shadow: inset 0 0 0 1px var(--color-bronze-light); }
+.gz-secondary:not(:disabled):active, .gz-secondary[aria-pressed="true"], .gz-secondary[aria-pressed="true"]:hover {
+  color: var(--color-navy); box-shadow: inset 0 0 0 1px var(--color-navy);
 }
+/* Primary button: bronze fill. */
+.gz-primary { background: var(--color-bronze); color: #fff; }
+.gz-primary:not(:disabled):hover { background: var(--color-bronze-hover); }
+.gz-primary:not(:disabled):active { background: var(--color-bronze-active); }
+
+/* Welcome option cards behave as a two-way toggle. */
+.gz-option { color: var(--color-bronze); border-color: var(--color-bronze); }
+.gz-option:hover { color: var(--color-bronze-light); border-color: var(--color-bronze-light); }
+.gz-option:active, .gz-option[aria-pressed="true"], .gz-option[aria-pressed="true"]:hover {
+  color: var(--color-navy); border-color: var(--color-navy);
+}
+
+/* Controls whose resting look already shows they are inactive (empty send, language while busy). */
+.gz-solid:disabled { opacity: 1; }
+/* The composer row draws the focus ring, so the textarea inside it does not. */
+.gz-composer textarea:focus-visible { outline: none; }
+
+.gz-panel-in { animation: gzIn .3s ease; }
+.gz-wave-bar { transform-origin: center; transform: scaleY(.18); animation-name: gzWave; animation-timing-function: ease-in-out; animation-iteration-count: infinite; }
+.gz-dot { animation: gzDot 1.2s infinite; }
+.gz-midnight :focus-visible { outline-color: var(--color-midnight-text); }
+@keyframes gzWave { 0%, 100% { transform: scaleY(.18); } 50% { transform: scaleY(1); } }
+@keyframes gzDot { 0%, 80%, 100% { opacity: .25; } 40% { opacity: 1; } }
+@keyframes gzIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .gz-panel-in, .gz-wave-bar, .gz-dot { animation: none; }
+  .gz-wave-bar { transform: scaleY(.6); }
+}
+
+.widget-composer { padding-bottom: max(0.75rem, env(safe-area-inset-bottom)); }

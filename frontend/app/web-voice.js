@@ -4,7 +4,8 @@ import { useEffect, useRef } from "react";
 import Vapi from "@vapi-ai/web";
 
 // Use the web peer for consented rooms so normal room closure is handled before reporting errors.
-export function useWebVoice({ session, sessionToken, onCallStart, onCallEnd, onError, onTranscript }) {
+// onSpeechChange and onPartialTranscript are display-only: they report activity and never change the call.
+export function useWebVoice({ session, sessionToken, onCallStart, onCallEnd, onError, onTranscript, onSpeechChange, onPartialTranscript }) {
   const client = useRef(null);
   const completed = useRef(false);
   const microphone = useRef(null);
@@ -17,7 +18,7 @@ export function useWebVoice({ session, sessionToken, onCallStart, onCallEnd, onE
     releaseMicrophone();
   }
   const handlers = useRef({});
-  handlers.current = { onCallStart, onCallEnd, onError, onTranscript };
+  handlers.current = { onCallStart, onCallEnd, onError, onTranscript, onSpeechChange, onPartialTranscript };
 
   function configure(track) {
     const call = new Vapi("local-preview", "/api/widget", {}, {audioSource: track, videoSource: false});
@@ -46,7 +47,11 @@ export function useWebVoice({ session, sessionToken, onCallStart, onCallEnd, onE
       }
       if (message.type === "transcript" && message.transcriptType === "final")
         handlers.current.onTranscript({ role: message.role, text: message.transcript });
+      if (message.type === "transcript" && message.transcriptType === "partial")
+        handlers.current.onPartialTranscript?.({ role: message.role, text: message.transcript });
     });
+    call.on("speech-start", () => handlers.current.onSpeechChange?.(true));
+    call.on("speech-end", () => handlers.current.onSpeechChange?.(false));
   }
 
   useEffect(() => () => dispose(), []);
@@ -89,6 +94,8 @@ export function useWebVoice({ session, sessionToken, onCallStart, onCallEnd, onE
       catch (error) { dispose(); if (!completed.current) throw error; }
       finally { clearTimeout(timer); }
     },
+    // Stops sending microphone audio while the call stays open; the visitor's Mute button.
+    setMuted(muted) { client.current?.setMuted(muted); },
     async endCall() {
       clearTimeout(closeTimer.current);
       client.current.end();

@@ -29,7 +29,7 @@ export default function PreviewAccess() {
       if ((e.data?.type === (voiceTab ? "gizelle:voice-session" : "gizelle:session")) && typeof e.data.session_token === "string" && typeof e.data.session_id === "string") {
         clearTimeout(timeout);
         setAccess({session_id:e.data.session_id, session_token:e.data.session_token,
-          startWithVoice:!!voiceTab,initialLanguage:e.data.language==="es"?"es":"en",
+          startWithVoice:!!voiceTab||e.data.mode==="voice",initialLanguage:e.data.language==="es"?"es":"en",
           initialHistory:Array.isArray(e.data.history)?e.data.history.slice(-24).filter(t=>["user","assistant"].includes(t?.role)&&typeof t.content==="string").map(t=>({role:t.role,content:t.content.slice(0,1200)})):[]});
       }
     }

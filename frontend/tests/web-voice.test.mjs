@@ -4,7 +4,7 @@ import {readFileSync} from "node:fs";
 import vm from "node:vm";
 import {EventEmitter} from "node:events";
 
-function fixture(denied=false) {
+function fixture(denied=false, extra={}) {
   const timers=new Map(); let stopped=0, requests=0, ended=0;
   const track={readyState:"live",stop(){stopped++;}};
   const stream={getAudioTracks:()=>[track],getTracks:()=>[track]};
@@ -14,6 +14,7 @@ function fixture(denied=false) {
     stop(){this.stops++;return Promise.resolve();}
     end(){}
     reconnect(){this.emit("call-start");return Promise.resolve();}
+    setMuted(value){this.muted=value;}
   }
   const context=vm.createContext({
     Vapi:Peer,useRef:value=>({current:value}),useEffect:()=>{},
@@ -27,7 +28,7 @@ function fixture(denied=false) {
   const source=readFileSync(new URL("../app/web-voice.js",import.meta.url),"utf8")
     .replace(/^import .*;$/gm,"").replace("export function useWebVoice","function useWebVoice");
   vm.runInContext(source,context);
-  const voice=context.useWebVoice({session:"test-session",onCallStart(){},onCallEnd(){ended++;},onError(){},onTranscript(){}});
+  const voice=context.useWebVoice({session:"test-session",onCallStart(){},onCallEnd(){ended++;},onError(){},onTranscript(){},...extra});
   return {voice,timers,Peer,get stopped(){return stopped;},get requests(){return requests;},get ended(){return ended;}};
 }
 
@@ -61,4 +62,28 @@ test("remote hang message allows buffered goodbye audio to drain before cleanup"
   assert.equal(peer.stops,1);
   assert.equal(f.ended,1);
   assert.equal(f.stopped,1);
+});
+
+test("speaking and partial transcripts are reported for display and final lines are unchanged",async()=>{
+  const seen={speech:[],partial:[],final:[]};
+  const f=fixture(false,{onSpeechChange:v=>seen.speech.push(v),onPartialTranscript:t=>seen.partial.push(t.text),onTranscript:t=>seen.final.push(t.text)});
+  await f.voice.prepareCall();await f.voice.startCall();
+  const peer=f.Peer.instance;
+  peer.emit("speech-start");peer.emit("speech-end");
+  peer.emit("message",{type:"transcript",transcriptType:"partial",role:"assistant",transcript:"Hello"});
+  peer.emit("message",{type:"transcript",transcriptType:"final",role:"assistant",transcript:"Hello there"});
+  assert.deepEqual(seen.speech,[true,false]);
+  assert.deepEqual(seen.partial,["Hello"]);
+  assert.deepEqual(seen.final,["Hello there"]);
+});
+
+test("mute stops sending microphone audio without ending the call",async()=>{
+  const f=fixture();
+  await f.voice.prepareCall();await f.voice.startCall();
+  f.voice.setMuted(true);
+  assert.equal(f.Peer.instance.muted,true);
+  assert.equal(f.ended,0);
+  assert.equal(f.stopped,0);
+  f.voice.setMuted(false);
+  assert.equal(f.Peer.instance.muted,false);
 });
