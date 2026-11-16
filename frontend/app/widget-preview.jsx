@@ -2,7 +2,8 @@
 
 import dynamic from "next/dynamic";
 
-const Widget = dynamic(() => import("./news/preview"), { ssr: false });
+export const preloadWidget = () => import("./news/preview");
+const Widget = dynamic(preloadWidget, { ssr: false });
 
 export default function Preview(props) {
   return <Widget {...props} />;

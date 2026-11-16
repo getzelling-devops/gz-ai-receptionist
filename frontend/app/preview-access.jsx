@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Preview from "./widget-preview";
+import Preview, { preloadWidget } from "./widget-preview";
 
 export default function PreviewAccess() {
   const [mounted,setMounted]=useState(false);
@@ -22,19 +22,25 @@ export default function PreviewAccess() {
     if (!voiceTab && (window.parent === window || location.hash !== "#website")) return;
     setEmbedded(true);
     const allowed = voiceTab ? [location.origin] : ["https://getzelling.com", "https://www.getzelling.com", "https://gz-gz-website.web.app"];
-    const timeout=setTimeout(()=>setError("Please close this tab or panel and open Gizelle again from the GetZelling website."),12000);
+    // Warm the UI bundle while hidden; a visitor session is issued only on open.
+    preloadWidget().catch(() => {});
+    let timeout;
+    const startTimeout=()=>{clearTimeout(timeout);timeout=setTimeout(()=>setError("Please close this tab or panel and open Gizelle again from the GetZelling website."),15000);};
+    if (voiceTab) startTimeout();
     function receive(e) {
       if (e.source !== (voiceTab ? window.opener : parent) || !allowed.includes(e.origin)) return;
+      if (e.data?.type === "gizelle:opening") { setError(""); startTimeout(); }
       if (e.data?.type === "gizelle:unavailable") setError("Please close Gizelle and try again in a moment.");
       if ((e.data?.type === (voiceTab ? "gizelle:voice-session" : "gizelle:session")) && typeof e.data.session_token === "string" && typeof e.data.session_id === "string") {
         clearTimeout(timeout);
-        setAccess({session_id:e.data.session_id, session_token:e.data.session_token,
+        setError("");
+        setAccess({session_id:e.data.session_id, session_token:e.data.session_token, hostOrigin:e.origin,
           startWithVoice:!!voiceTab||e.data.mode==="voice",initialLanguage:e.data.language==="es"?"es":"en",
           initialHistory:Array.isArray(e.data.history)?e.data.history.slice(-24).filter(t=>["user","assistant"].includes(t?.role)&&typeof t.content==="string").map(t=>({role:t.role,content:t.content.slice(0,1200)})):[]});
       }
     }
     window.addEventListener("message", receive);
-    for (const origin of allowed) (voiceTab ? window.opener : parent).postMessage({type:voiceTab ? "gizelle:voice-ready" : "gizelle:ready"}, origin);
+    for (const origin of allowed) (voiceTab ? window.opener : parent).postMessage({type:voiceTab ? "gizelle:voice-ready" : "gizelle:ready",loadedAcknowledgment:true}, origin);
     return () => { clearTimeout(timeout); window.removeEventListener("message", receive); };
   }, []);
 
@@ -53,7 +59,7 @@ export default function PreviewAccess() {
   }
 
   if (!mounted) return <main role="status" className="min-h-dvh bg-white p-6 text-navy">Opening Gizelle…</main>;
-  if (access) return <Preview sessionId={access.session_id} sessionToken={access.session_token} startWithVoice={access.startWithVoice} initialLanguage={access.initialLanguage} initialHistory={access.initialHistory} />;
+  if (access) return <Preview sessionId={access.session_id} sessionToken={access.session_token} startWithVoice={access.startWithVoice} initialLanguage={access.initialLanguage} initialHistory={access.initialHistory} hostOrigin={access.hostOrigin} />;
   if (embedded) return <main role="status" className="min-h-dvh bg-white p-6 text-navy">{error || "Opening Gizelle…"}</main>;
   return <main className="mx-auto flex min-h-dvh w-full max-w-[450px] flex-col justify-center gap-4 px-6">
     <p className="text-xs font-medium uppercase tracking-[0.16em] text-bronze">GetZelling</p>

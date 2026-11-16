@@ -14,9 +14,9 @@
   const es = document.documentElement.lang.startsWith("es");
   const t = es
     ? {talk: "Hablar con Gizelle", live: "Llamada de voz en vivo", retry: "Inténtalo de nuevo", chat: "Chat", chatLabel: "Chatear con Gizelle",
-      nudge: "¿Preguntas? Gizelle puede atenderte por llamada de voz en vivo o por chat.", dismiss: "Cerrar", frame: "Asistente de GetZelling"}
+      nudge: "¿Preguntas? Gizelle puede atenderte por llamada de voz en vivo o por chat.", dismiss: "Cerrar", frame: "Asistente de GetZelling", close: "Minimizar Gizelle", opening: "Abriendo Gizelle…", failed: "No se pudo abrir Gizelle. Inténtalo de nuevo."}
     : {talk: "Talk to Gizelle", live: "Live voice call", retry: "Try again", chat: "Chat", chatLabel: "Chat with Gizelle",
-      nudge: "Questions? Gizelle can take a live voice call or chat.", dismiss: "Dismiss", frame: "GetZelling assistant"};
+      nudge: "Questions? Gizelle can take a live voice call or chat.", dismiss: "Dismiss", frame: "GetZelling assistant", close: "Minimize Gizelle", opening: "Opening Gizelle…", failed: "Gizelle couldn’t open. Please try again."};
   const root = document.createElement("div");
   root.id = "gz-gizelle";
   const shadow = root.attachShadow({ mode: "open" });
@@ -61,6 +61,12 @@
       height:min(680px,calc(100dvh - 48px));border:1px solid var(--border);border-radius:12px;background:#fff;
       overflow:hidden;box-shadow:var(--elevation-card);animation:gzIn .3s ease}
     .panel[hidden]{display:none}
+    .loading{position:absolute;inset:0;z-index:2;background:#fff;padding:24px;color:var(--navy)}
+    .loading[hidden]{display:none}
+    .loading-close{position:absolute;top:12px;right:12px;width:32px;height:32px;border:0;background:transparent;color:var(--navy);font-size:24px;line-height:1}
+    .loading-copy{margin:36px 0 16px;font-size:15px;line-height:1.5}
+    .loading-retry{border:1px solid #8C6844;border-radius:4px;background:#fff;color:#8C6844;padding:10px 14px;font-size:14px}
+    .loading-retry[hidden]{display:none}
     iframe{display:block;border:0;width:100%;height:100%;background:#fff}
     @keyframes gzIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
     @media(max-width:500px){.dock{right:16px;bottom:16px}.panel{right:16px;bottom:16px;height:calc(100dvh - 32px)}}
@@ -83,13 +89,26 @@
       </button>
     </div>
   </div>
-  <section class="panel" id="gizelle-panel" role="region" aria-label="Gizelle" hidden></section>`;
+  <section class="panel" id="gizelle-panel" role="region" aria-label="Gizelle" hidden>
+    <div class="loading">
+      <button type="button" class="loading-close" aria-label="${t.close}">×</button>
+      <p class="loading-copy" role="status">${t.opening}</p>
+      <button type="button" class="loading-retry" hidden>${t.retry}</button>
+    </div>
+  </section>`;
   const dock = shadow.querySelector(".dock");
   const nudge = shadow.querySelector(".nudge");
   const talk = shadow.querySelector(".talk");
   const chat = shadow.querySelector(".chat");
   const panel = shadow.querySelector(".panel");
+  const loading = shadow.querySelector(".loading");
+  const loadingCopy = shadow.querySelector(".loading-copy");
+  const retry = shadow.querySelector(".loading-retry");
   let frame;
+  let frameReady = false;
+  let panelReady = false;
+  let loadedAcknowledgment = false;
+  let loadingTimer;
   let opening = false;
   let sessionSent = false;
   let mode = "chat";
@@ -175,24 +194,66 @@
     setTimeout(() => { nudge.hidden = true; }, 300);
   }
 
-  window.addEventListener("message", async e => {
-    if (!frame || e.source !== frame.contentWindow || e.origin !== origin) return;
-    if (e.data?.type === "gizelle:minimize") return minimize();
-    if (!site || e.data?.type !== "gizelle:ready" || opening) return;
+  function showMode() {
+    if (panel.hidden || !frame) return;
+    frame.contentWindow.postMessage({type:"gizelle:show", mode}, origin);
+  }
+  function markReady() {
+    clearTimeout(loadingTimer);
+    panelReady = true;
+    loading.hidden = true;
+    panel.setAttribute("aria-busy", "false");
+    showMode();
+    if (!panel.hidden) { frame.removeAttribute("aria-hidden"); frame.focus(); }
+  }
+  function failed(requestFrame) {
+    if (requestFrame !== frame) return;
+    clearTimeout(loadingTimer);
+    frame.remove(); frame = null; frameReady = false; panelReady = false;
+    opening = false; sessionSent = false; loadedAcknowledgment = false;
+    loadingCopy.textContent = t.failed;
+    retry.hidden = false; loading.hidden = false;
+    panel.setAttribute("aria-busy", "false");
+  }
+  async function authorize() {
+    if (!site || !frameReady || opening || sessionSent || panel.hidden) return;
     opening = true;
+    const requestFrame = frame;
+    requestFrame.contentWindow.postMessage({type:"gizelle:opening"}, origin);
     try {
-      const r = await fetch("/api/preview/gizelle-session", {method:"POST", cache:"no-store"});
+      const r = await fetch("/api/preview/gizelle-session", {method:"POST", cache:"no-store", signal:AbortSignal.timeout(20000)});
       if (!r.ok) throw Error();
       const {session_id, session_token} = await r.json();
-      frame.contentWindow.postMessage({type:"gizelle:session", session_id, session_token, mode, language: es ? "es" : "en"}, origin);
+      if (frame !== requestFrame) return;
       sessionSent = true;
-    } catch {
-      frame.contentWindow.postMessage({type:"gizelle:unavailable"}, origin);
-      frame.remove(); frame = null; sessionSent = false;
-      minimize();
-      shadow.querySelector(".talk .sub").textContent = t.retry;
-    } finally { opening = false; }
+      requestFrame.contentWindow.postMessage({type:"gizelle:session", session_id, session_token, mode, language: es ? "es" : "en"}, origin);
+      // Older panels already display their own loading state after this point.
+      if (!loadedAcknowledgment) markReady();
+    } catch { failed(requestFrame); }
+    finally { if (frame === requestFrame) opening = false; }
+  }
+  window.addEventListener("message", e => {
+    if (!frame || e.source !== frame.contentWindow || e.origin !== origin) return;
+    if (e.data?.type === "gizelle:minimize") return minimize();
+    if (e.data?.type === "gizelle:loaded" && (!site || sessionSent)) return markReady();
+    if (!site || e.data?.type !== "gizelle:ready") return;
+    frameReady = true;
+    loadedAcknowledgment = e.data.loadedAcknowledgment === true;
+    authorize();
   });
+
+  function ensureFrame() {
+    if (frame) return;
+    frame = document.createElement("iframe");
+    frame.src = origin + (site ? "/#website" : "/");
+    frame.title = t.frame;
+    frame.allow = "microphone";
+    frame.loading = "eager";
+    frame.tabIndex = -1;
+    frame.setAttribute("aria-hidden", "true");
+    if (!site) frame.addEventListener("load", markReady, {once:true});
+    panel.append(frame);
+  }
 
   function setExpanded(value) {
     talk.setAttribute("aria-expanded", value);
@@ -209,27 +270,40 @@
   function open(nextMode, from) {
     mode = nextMode; opener = from;
     nudge.hidden = true;
-    if (!frame) {
-      sessionSent = false;
-      frame = document.createElement("iframe");
-      frame.src = origin + (site ? "/#website" : "/");
-      frame.title = t.frame;
-      frame.allow = "microphone";
-      // Without the website handshake, tell the panel which step to show once it loads.
-      if (!site) frame.addEventListener("load", () => frame?.contentWindow.postMessage({type:"gizelle:show", mode}, origin), {once: true});
-      panel.append(frame);
-    } else if (sessionSent || !site) {
-      frame.contentWindow.postMessage({type:"gizelle:show", mode}, origin);
-    }
-    shadow.querySelector(".talk .sub").textContent = t.live;
+    // Parent-owned feedback paints even while the iframe has no document yet.
     panel.hidden = false;
     dock.hidden = true;
     setExpanded("true");
-    frame.focus();
+    if (!panelReady) {
+      loadingCopy.textContent = t.opening;
+      retry.hidden = true; loading.hidden = false;
+      panel.setAttribute("aria-busy", "true");
+      clearTimeout(loadingTimer);
+      loadingTimer = setTimeout(() => failed(frame), 30000);
+    }
+    ensureFrame();
+    shadow.querySelector(".talk .sub").textContent = t.live;
+    if (panelReady) { showMode(); frame.removeAttribute("aria-hidden"); frame.focus(); }
+    else { shadow.querySelector(".loading-close").focus(); authorize(); }
   }
+
   talk.addEventListener("click", () => open("voice", talk));
   chat.addEventListener("click", () => open("chat", chat));
   shadow.querySelector(".dismiss").addEventListener("click", hideNudge);
   shadow.addEventListener("keydown", event => { if (event.key === "Escape") minimize(); });
+  shadow.querySelector(".loading-close").addEventListener("click", minimize);
+  retry.addEventListener("click", () => open(mode, opener));
   document.body.append(root);
+
+  // Warm assets after the page settles, without visitor sessions, model calls,
+  // microphone access or focus changes. Admission was checked before reaching here.
+  const warm = () => {
+    if (navigator.connection?.saveData) return;
+    setTimeout(() => {
+      if ("requestIdleCallback" in window) window.requestIdleCallback(ensureFrame, {timeout:3000});
+      else setTimeout(ensureFrame, 250);
+    }, 800);
+  };
+  if (document.readyState === "complete") warm();
+  else window.addEventListener("load", warm, {once:true});
 })();

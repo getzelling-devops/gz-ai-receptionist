@@ -119,7 +119,7 @@ function Terms({ w, className = "" }) {
   </p>;
 }
 
-export default function NewsPreview({ sessionToken, sessionId, startWithVoice = false, initialHistory = [], initialLanguage = "en" }) {
+export default function NewsPreview({ sessionToken, sessionId, startWithVoice = false, initialHistory = [], initialLanguage = "en", hostOrigin }) {
   const [voiceState, setVoiceState] = useState(startWithVoice ? "consent" : "text");
   const [session, setSession] = useState(() => sessionId || crypto.randomUUID());
   const [micIssue,setMicIssue] = useState(false);
@@ -234,14 +234,15 @@ export default function NewsPreview({ sessionToken, sessionId, startWithVoice = 
   // The message only changes which step is shown; starting a call still needs Agree and call.
   useEffect(() => {
     const show = e => {
-      if (e.source !== window.parent || e.data?.type !== "gizelle:show" || !["voice", "chat"].includes(e.data.mode)) return;
+      if (e.source !== window.parent || (hostOrigin && e.origin !== hostOrigin) || e.data?.type !== "gizelle:show" || !["voice", "chat"].includes(e.data.mode)) return;
       setMenuOpen(false);
       if (e.data.mode === "voice") setVoiceState(state => { if (state === "text") { setMicIssue(false); return "consent"; } return state; });
       else { setVoiceState(state => state === "consent" ? "text" : state); setTimeout(() => input.current?.focus(), 50); }
     };
     window.addEventListener("message", show);
+    if (window.parent !== window && hostOrigin) window.parent.postMessage({type:"gizelle:loaded"}, hostOrigin);
     return () => window.removeEventListener("message", show);
-  }, []);
+  }, [hostOrigin]);
 
   useEffect(() => {
     if (voiceState !== "active") return;
@@ -355,7 +356,7 @@ export default function NewsPreview({ sessionToken, sessionId, startWithVoice = 
       <div role="group" aria-label={w.language} className="flex overflow-hidden rounded-[4px] border border-hairline">
         {["en", "es"].map(value => <button key={value} type="button" disabled={locked}
           aria-pressed={language === value} onClick={() => { setLanguage(value); setError(""); }}
-          className={`gz-ease gz-solid h-[30px] w-[30px] text-xs font-medium ${language === value ? "bg-navy text-white" : "bg-white text-muted"}`}>
+          className={`gz-ease gz-solid h-[30px] w-[30px] text-xs font-medium ${language === value ? "bg-bronze text-white" : "bg-white text-muted"}`}>
           {value === "en" ? "EN" : "ES"}
         </button>)}
       </div>
