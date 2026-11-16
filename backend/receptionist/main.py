@@ -8,6 +8,7 @@ from fastapi import Depends, FastAPI, HTTPException
 from google.api_core.exceptions import AlreadyExists
 
 from .booking import Calendar, ToolError, availability, book
+from . import brevo_contacts, lead_capture
 from .config import database
 from .records import deliver, extract_lead, key_for, notification, obj, save_lead
 from .security import signed_message
@@ -35,12 +36,19 @@ def call_ended(message: Message):
     conversation_id(message)
     try:
         db = database()
-        lead = extract_lead(message)
+        lead = lead_capture.enrich_report(db, extract_lead(message))
         consent = db.collection("voice_consents").document(lead["call_id"]).get()
         if consent.exists:
             lead["recording_consent"] = consent.to_dict()
         delivery = save_lead(db, lead)
-        deliver(db, delivery)
+        failures = []
+        for action in (lambda: deliver(db, delivery), lambda: brevo_contacts.sync_lead(db, lead)):
+            try:
+                action()
+            except Exception as exc:
+                failures.append(type(exc).__name__)
+        if failures:
+            raise RuntimeError("Lead delivery pending")
     except Exception as exc:
         # Provider exception bodies may contain personal data or credentials.
         log.error("Call report processing failed (%s)", type(exc).__name__)
@@ -80,7 +88,7 @@ def escalate(db, operation, args):
 @app.post("/tools/{tool_name}")
 def tools(tool_name: str, message: Message):
     if tool_name not in {"check-availability", "book-appointment", "reschedule-appointment",
-                         "escalate-urgent", "finish-call"}:
+                         "escalate-urgent", "finish-call", "capture-lead"}:
         raise HTTPException(404)
     calls = message.get("toolCallList")
     if message.get("type") != "tool-calls" or not isinstance(calls, list) or not calls:
@@ -112,7 +120,12 @@ def tools(tool_name: str, message: Message):
                                 "GZ_FAREWELL_COMPLETE. Now invoke end_getzelling_call without additional speech."})
                 continue
             db = database()
-            if tool_name == "escalate-urgent":
+            if tool_name == "capture-lead":
+                try:
+                    reply = lead_capture.capture(db, args, message)
+                except (ValueError, KeyError):
+                    raise ToolError("Confirm an exact email or complete callback number and the visitor's stated interest before saving the inquiry.") from None
+            elif tool_name == "escalate-urgent":
                 reply = escalate(db, key_for(conversation, call["id"]), args)
             else:
                 cal = Calendar()

@@ -61,7 +61,7 @@ def render(subject, body, lead=None):
         "contact_line":contact,"reply_href":escape(href,quote=True),"reply_label":label,
         "chip_label":"Lead type","chip_value":escape(lead.get("lead_type") or "Inquiry"),
         "received_time":escape(local.strftime("%I:%M %p %Z").lstrip("0")),
-        "referrer_path":escape("Web voice" if lead.get("channel")=="web" else "Phone" if lead.get("channel")=="phone" else "Gizelle"),
+        "referrer_path":escape("Web voice" if lead.get("channel") in ("web", "web_voice") else "Phone" if lead.get("channel")=="phone" else "Web text" if lead.get("channel")=="web_text" else "Gizelle"),
         "field_rows":"".join(details),
         "meta_rows":row("Received",escape(local.strftime("%b %d, %Y · %I:%M %p %Z"))),
         "footer_blurb":"Internal lead notification for the GetZelling team. Sent by Gizelle.",

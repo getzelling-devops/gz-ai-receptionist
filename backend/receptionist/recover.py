@@ -4,6 +4,7 @@ import logging
 from google.cloud.firestore_v1.base_query import FieldFilter
 
 from .booking import Calendar, book
+from .brevo_contacts import sync_job
 from .config import database
 from .records import deliver
 from .rescheduling import reschedule
@@ -12,6 +13,12 @@ from .rescheduling import reschedule
 def run():
     db = database()
     failed = False
+    for item in db.collection("brevo_contact_jobs").where(filter=FieldFilter("status", "==", "pending")).stream():
+        try:
+            sync_job(db, item.reference)
+        except Exception as exc:
+            logging.error("Brevo contact %s: %s", item.id, type(exc).__name__)
+            failed = True
     for item in db.collection("deliveries").where(filter=FieldFilter("status", "==", "pending")).stream():
         try:
             deliver(db, item.reference)

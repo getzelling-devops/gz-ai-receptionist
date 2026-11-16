@@ -105,6 +105,7 @@ class Join(BaseModel):
 def overrides(session):
     return {"variableValues": {
         "gz_language": session.language,
+        "gz_session": str(session.session),
         "gz_market": "" if os.getenv("WEB_RETRIEVAL_TOOL") == "true" else reviewed_market_context(),
         "gz_handoff": json.dumps([turn.model_dump() for turn in session.history], ensure_ascii=False),
     }}
@@ -134,6 +135,9 @@ def chat(value: Chat):
         if prior.get("session_id") != str(value.session):
             raise HTTPException(403, "Chat session mismatch")
         payload["previousChatId"] = str(value.previous)
+    db.collection("web_text_sessions").document(str(value.session)).set({
+        "expires_at": datetime.now(UTC) + timedelta(hours=2),
+    })
     reply = provider("chat", payload)
     text = "\n".join(m.get("content") or m.get("message") or "" for m in reply.get("output", [])
                      if m.get("role") in ("assistant", "bot")).strip()
