@@ -123,8 +123,12 @@ def tools(tool_name: str, message: Message):
             if tool_name == "capture-lead":
                 try:
                     reply = lead_capture.capture(db, args, message)
-                except (ValueError, KeyError):
-                    raise ToolError("Confirm an exact email or complete callback number and the visitor's stated interest before saving the inquiry.") from None
+                except (ValueError, KeyError) as exc:
+                    reason = str(exc) if type(exc) is ValueError and str(exc) in {
+                        "Unknown assistant", "Voice consent required", "Website assistant required", "Website text session required"
+                    } else type(exc).__name__
+                    log.warning("Lead capture rejected (%s)", reason)
+                    raise ToolError("GZ_INQUIRY_NOT_SAVED. Do not say the inquiry was saved. Confirm an exact email or complete callback number and the visitor's stated interest before retrying.") from None
             elif tool_name == "escalate-urgent":
                 reply = escalate(db, key_for(conversation, call["id"]), args)
             else:

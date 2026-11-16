@@ -27,9 +27,10 @@ class LeadInput(BaseModel):
 
 def capture(db, args, message):
     value = LeadInput.model_validate(args)
-    call, chat = message.get("call") or {}, message.get("chat") or {}
-    conversation = call or chat
-    aid = conversation.get("assistantId")
+    chat = message.get("chat") or {}
+    call = (message.get("call") or {}) if not chat else {}
+    conversation = chat or call
+    aid = conversation.get("assistantId") or (message.get("assistant") or {}).get("id")
     if aid not in (PHONE_ASSISTANT, WEB_ASSISTANT):
         raise ValueError("Unknown assistant")
     cid = str(UUID(conversation["id"]))
@@ -42,7 +43,8 @@ def capture(db, args, message):
     else:
         if aid != WEB_ASSISTANT:
             raise ValueError("Website assistant required")
-        settings = (chat.get("assistantOverrides") or {}).get("variableValues") or {}
+        settings = {**((chat.get("metadata") or {}).get("variableValues") or {}),
+                    **((chat.get("assistantOverrides") or {}).get("variableValues") or {})}
         sid = str(UUID(settings["gz_session"]))
         session = db.collection("web_text_sessions").document(sid).get().to_dict() or {}
         if not session or session["expires_at"] <= datetime.now(UTC):
@@ -83,7 +85,7 @@ def capture(db, args, message):
         brevo_contacts.sync_job(db, job)
     except Exception as exc:
         log.warning("Brevo synchronization pending (%s)", type(exc).__name__)
-    return {"result": "Confirmed inquiry saved for the GetZelling team. Do not claim a report or customer email was sent."}
+    return {"result": "GZ_INQUIRY_SAVED. Confirmed inquiry saved for the GetZelling team. Do not claim a report or customer email was sent."}
 
 
 def enrich_report(db, lead):

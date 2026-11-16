@@ -1,4 +1,4 @@
-"""Durable, additive Brevo list sync. Never subscribe, force-merge, or send campaigns."""
+"""Durable, additive Brevo list sync. Never reset opt-outs, force-merge, or send campaigns."""
 import hashlib
 import json
 import logging

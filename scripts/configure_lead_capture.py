@@ -25,7 +25,7 @@ def update(config, tid):
         prompt = re.sub(r"^## Confirmed lead capture\n.*?(?=^## |\Z)", instruction + "\n\n", prompt, flags=re.M | re.S)
     else:
         prompt = prompt.rstrip() + "\n\n" + instruction + "\n"
-    model["messages"][0]["content"] = prompt
+    model["messages"][0]["content"] = prompt.rstrip() + "\n"
     model["toolIds"] = list(dict.fromkeys([*model.get("toolIds", []), tid]))
     properties = config["analysisPlan"]["structuredDataPlan"]["schema"]["properties"]
     properties["lead_types"] = {"type": "array", "items": {"type": "string", "enum": ROLES},
@@ -61,8 +61,11 @@ with httpx.Client(base_url="https://api.vapi.ai", headers={"Authorization": "Bea
     path.write_text(json.dumps(phone, ensure_ascii=False, indent=2) + "\n")
     path = ROOT / "backend/assistant-prompt.md"
     text = path.read_text()
-    if "## Confirmed lead capture" not in text:
-        path.write_text(text.rstrip() + "\n\n" + instruction + "\n")
+    if "## Confirmed lead capture" in text:
+        text = re.sub(r"^## Confirmed lead capture\n.*?(?=^## |\Z)", instruction + "\n\n", text, flags=re.M | re.S)
+    else:
+        text = text.rstrip() + "\n\n" + instruction
+    path.write_text(text.rstrip() + "\n")
     print("Prepared signed capture tool:", tool["id"])
     if args.publish:
         for aid in (PHONE, WEB):

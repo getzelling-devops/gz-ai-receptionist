@@ -171,3 +171,13 @@ class DurableSync(unittest.TestCase):
         send.assert_called_once()
         self.assertEqual(send.call_args.args[1]["email"], "correct@example.com")
         self.assertEqual(old.get().get("status"), "superseded")
+
+    def test_provider_chat_metadata_and_top_level_assistant_are_supported(self):
+        sid = str(uuid4())
+        self.db.collection("web_text_sessions").document(sid).set({"expires_at": datetime.now(UTC)+timedelta(hours=1)})
+        message = {"assistant": {"id": capture.WEB_ASSISTANT},
+            "chat": {"id": str(uuid4()), "metadata": {"variableValues": {"gz_session": sid}}}}
+        args = {"email": "alex@example.com", "email_confirmed": True, "lead_types": ["buyer"], "summary": "Follow up"}
+        with patch.object(capture.records, "deliver"), patch.object(b, "sync_job"):
+            result = capture.capture(self.db, args, message)
+        self.assertIn("GZ_INQUIRY_SAVED", result["result"])

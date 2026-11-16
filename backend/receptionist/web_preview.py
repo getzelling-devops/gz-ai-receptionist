@@ -141,6 +141,14 @@ def chat(value: Chat):
     reply = provider("chat", payload)
     text = "\n".join(m.get("content") or m.get("message") or "" for m in reply.get("output", [])
                      if m.get("role") in ("assistant", "bot")).strip()
+    captures = {tool["id"] for m in reply.get("output", []) for tool in m.get("tool_calls", [])
+                if (tool.get("function") or {}).get("name") == "capture-lead"}
+    saved = {m.get("tool_call_id") for m in reply.get("output", [])
+             if m.get("role") == "tool" and "GZ_INQUIRY_SAVED" in str(m.get("content") or "")}
+    if captures and not captures.issubset(saved):
+        text = ("Todavía no he guardado su consulta. Confirme su correo exacto o un número de teléfono completo para volver a intentarlo. También puede escribirme a gizelle@getzelling.com."
+                if value.language == "es" else
+                "I haven't saved your inquiry yet. Please confirm your exact email or complete callback number so I can try again. You can also email me at gizelle@getzelling.com.")
     if not text:
         raise HTTPException(502, "No assistant reply")
     chat_id = str(UUID(reply["id"]))

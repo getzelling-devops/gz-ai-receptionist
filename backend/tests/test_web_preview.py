@@ -98,3 +98,18 @@ class UnifiedWebsiteChat(unittest.TestCase):
             self.assertEqual(result["citations"], [citation])
             self.assertEqual(result["answer"], "Dated evidence.")
             provider.assert_not_called()
+
+    def test_failed_capture_cannot_be_presented_as_success_in_either_language(self):
+        for language in ("en", "es"):
+            for marker in ("GZ_INQUIRY_NOT_SAVED", "GZ_INQUIRY_SAVED"):
+                output = [
+                    {"role": "assistant", "tool_calls": [{"id": "capture", "function": {"name": "capture-lead"}}]},
+                    {"role": "tool", "tool_call_id": "capture", "content": marker},
+                    {"role": "assistant", "content": "Your inquiry is saved."},
+                ]
+                with patch.object(web, "clients", return_value=(MagicMock(), None)), patch.object(web, "provider", return_value={"id": str(uuid4()), "output": output}):
+                    result = web.chat(web.Chat(session=uuid4(), language=language, history=[], question="My email is confirmed; please contact me."))
+                if marker == "GZ_INQUIRY_SAVED":
+                    self.assertEqual(result["answer"], "Your inquiry is saved.")
+                else:
+                    self.assertIn("haven't saved" if language == "en" else "no he guardado", result["answer"])
