@@ -45,6 +45,8 @@ def capture(db, args, message):
             raise ValueError("Website assistant required")
         settings = {**((chat.get("metadata") or {}).get("variableValues") or {}),
                     **((chat.get("assistantOverrides") or {}).get("variableValues") or {})}
+        if not settings.get("gz_session"):
+            return {"result": "GZ_CHAT_CAPTURE_PENDING. The authenticated website bridge must complete this save. Do not claim success or ask the visitor to repeat confirmed details; the website will supply the final save confirmation."}
         sid = str(UUID(settings["gz_session"]))
         session = db.collection("web_text_sessions").document(sid).get().to_dict() or {}
         if not session or session["expires_at"] <= datetime.now(UTC):

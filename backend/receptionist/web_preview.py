@@ -1,5 +1,6 @@
 """Local operator preview. Run separately from both Cloud Run services."""
 import hashlib
+import hmac
 import json
 import logging
 import os
@@ -20,7 +21,7 @@ from google.cloud import firestore, secretmanager
 from pydantic import BaseModel, ConfigDict, Field, StrictBool
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
-from .config import PROJECT
+from .config import PROJECT, secret
 from .market_client import search as search_market
 from .web_market import reviewed_market_context
 
@@ -141,10 +142,41 @@ def chat(value: Chat):
     reply = provider("chat", payload)
     text = "\n".join(m.get("content") or m.get("message") or "" for m in reply.get("output", [])
                      if m.get("role") in ("assistant", "bot")).strip()
-    captures = {tool["id"] for m in reply.get("output", []) for tool in m.get("tool_calls", [])
-                if (tool.get("function") or {}).get("name") == "capture-lead"}
+    capture_tools = [tool for m in reply.get("output", []) for tool in m.get("tool_calls", [])
+                     if (tool.get("function") or {}).get("name") == "capture-lead"]
+    # The latest corrected capture supersedes an earlier failed candidate.
+    captures = {capture_tools[-1]["id"]} if capture_tools else set()
     saved = {m.get("tool_call_id") for m in reply.get("output", [])
              if m.get("role") == "tool" and "GZ_INQUIRY_SAVED" in str(m.get("content") or "")}
+    bridged = False
+    if captures - saved:
+        # Vapi's chat webhook can omit runtime variables. This authenticated
+        # bridge owns the session and signs the canonical context itself.
+        tools = [tool for m in reply.get("output", []) for tool in m.get("tool_calls", [])
+                 if tool.get("id") in captures - saved]
+        message = {"type": "tool-calls", "chat": {"id": str(UUID(reply["id"])), "assistantId": ASSISTANT_ID,
+            "assistantOverrides": overrides(value),
+            "messages": [turn.model_dump() for turn in value.history] + [{"role": "user", "content": value.question}]},
+            "toolCallList": tools}
+        body = json.dumps({"message": message}, ensure_ascii=False).encode()
+        stamp = str(int(time.time()))
+        try:
+            signature = hmac.new(secret("VAPI_HMAC_SECRET", "vapi-webhook-hmac"), stamp.encode()+b"."+body, hashlib.sha256).hexdigest()
+            response = httpx.post("https://receptionist-staging-831469210783.us-east1.run.app/tools/capture-lead",
+                content=body, headers={"Content-Type": "application/json", "x-timestamp": stamp, "x-signature": signature}, timeout=40)
+            response.raise_for_status()
+            saved.update(result.get("toolCallId") for result in response.json().get("results", [])
+                         if "GZ_INQUIRY_SAVED" in str(result.get("result") or ""))
+            bridged = captures.issubset(saved)
+        except Exception as exc:
+            log.warning("Website lead capture pending (%s)", type(exc).__name__)
+    if bridged:
+        confirmation = ("Gracias, he guardado su consulta para que el equipo de GetZelling le contacte."
+                        if value.language == "es" else
+                        "Thank you—your inquiry has been saved for the GetZelling team to follow up.")
+        other_tools = any((tool.get("function") or {}).get("name") != "capture-lead"
+                          for m in reply.get("output", []) for tool in m.get("tool_calls", []))
+        text = confirmation + (" " + text if other_tools else "")
     if captures and not captures.issubset(saved):
         text = ("Todavía no he guardado su consulta. Confirme su correo exacto o un número de teléfono completo para volver a intentarlo. También puede escribirme a gizelle@getzelling.com."
                 if value.language == "es" else

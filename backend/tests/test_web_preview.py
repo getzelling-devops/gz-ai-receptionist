@@ -107,9 +107,37 @@ class UnifiedWebsiteChat(unittest.TestCase):
                     {"role": "tool", "tool_call_id": "capture", "content": marker},
                     {"role": "assistant", "content": "Your inquiry is saved."},
                 ]
-                with patch.object(web, "clients", return_value=(MagicMock(), None)), patch.object(web, "provider", return_value={"id": str(uuid4()), "output": output}):
+                with patch.object(web, "clients", return_value=(MagicMock(), None)), patch.object(web, "secret", side_effect=RuntimeError("Unavailable")), patch.object(web, "provider", return_value={"id": str(uuid4()), "output": output}):
                     result = web.chat(web.Chat(session=uuid4(), language=language, history=[], question="My email is confirmed; please contact me."))
                 if marker == "GZ_INQUIRY_SAVED":
                     self.assertEqual(result["answer"], "Your inquiry is saved.")
                 else:
                     self.assertIn("haven't saved" if language == "en" else "no he guardado", result["answer"])
+
+    def test_authenticated_bridge_completes_capture_with_its_own_session(self):
+        reply = {"id": str(uuid4()), "output": [
+            {"role": "assistant", "tool_calls": [{"id": "capture", "function": {"name": "capture-lead", "arguments": '{"email":"alex@example.com","email_confirmed":true,"lead_types":["buyer"],"summary":"Follow up"}'}}]},
+            {"role": "tool", "tool_call_id": "capture", "content": "GZ_CHAT_CAPTURE_PENDING"},
+            {"role": "assistant", "content": "Is there anything else?"},
+        ]}
+        response = MagicMock(); response.json.return_value = {"results": [{"toolCallId": "capture", "result": "GZ_INQUIRY_SAVED"}]}
+        value = web.Chat(session=uuid4(), language="en", history=[], question="Please contact me by email.")
+        with patch.object(web, "clients", return_value=(MagicMock(), None)), patch.object(web, "provider", return_value=reply), patch.object(web, "secret", return_value=b"key"), patch.object(web.httpx, "post", return_value=response) as post:
+            result = web.chat(value)
+        self.assertIn("has been saved", result["answer"])
+        forwarded = json.loads(post.call_args.kwargs["content"])["message"]
+        self.assertEqual(forwarded["chat"]["assistantOverrides"]["variableValues"]["gz_session"], str(value.session))
+        self.assertIn("x-signature", post.call_args.kwargs["headers"])
+
+    def test_latest_successful_correction_supersedes_an_earlier_failed_capture(self):
+        reply = {"id": str(uuid4()), "output": [
+            {"role": "assistant", "tool_calls": [{"id": "old", "function": {"name": "capture-lead"}}]},
+            {"role": "tool", "tool_call_id": "old", "content": "GZ_INQUIRY_NOT_SAVED"},
+            {"role": "assistant", "tool_calls": [{"id": "corrected", "function": {"name": "capture-lead"}}]},
+            {"role": "tool", "tool_call_id": "corrected", "content": "GZ_INQUIRY_SAVED"},
+            {"role": "assistant", "content": "Your corrected inquiry is saved."},
+        ]}
+        with patch.object(web, "clients", return_value=(MagicMock(), None)), patch.object(web, "provider", return_value=reply), patch.object(web.httpx, "post") as post:
+            result = web.chat(web.Chat(session=uuid4(), language="en", history=[], question="My email is correct; contact me."))
+        self.assertEqual(result["answer"], "Your corrected inquiry is saved.")
+        post.assert_not_called()
