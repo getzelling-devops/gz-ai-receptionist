@@ -70,6 +70,8 @@
     iframe{display:block;border:0;width:100%;height:100%;background:#fff}
     @keyframes gzIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
     @media(max-width:500px){.dock{right:16px;bottom:16px}.panel{right:16px;bottom:16px;height:calc(100dvh - 32px)}}
+    /* Phones: Buyers and Sellers already carry a bottom bar, so the launcher stays out of the way there. */
+    @media(max-width:760px){:host(.on-results) .dock{display:none}}
     @media(prefers-reduced-motion:reduce){.dock,.nudge{transition:none}.panel{animation:none}}
   </style>
   <div class="dock" hidden>
@@ -154,6 +156,7 @@
     toneQueued = true;
     requestAnimationFrame(() => {
       toneQueued = false;
+      root.classList.toggle("on-results", !!document.querySelector(".gzb-bar"));
       if (!dock.hidden) bar.classList.toggle("light", backdropIsDark());
     });
   };
